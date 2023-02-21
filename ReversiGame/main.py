@@ -1,144 +1,162 @@
-# Reversi in Python
-# Coords are formatted [y][x]
-# [0][0] is top-left of board
-
-# To-do: weird bug on test moves to fix
-
 import json
 
+class Player:
+    def __init__(self, color):
+        self.color = color
+        self.score = 0
 
-class Board:
+class ReversiBoard:
+    BLACK = 'b'
+    WHITE = 'w'
+    EMPTY = ' '
+
+    DIRECTIONS = [[0, 1], [1, 1], [1, 0], [1, -1],
+                  [0, -1], [-1, -1], [-1, 0], [-1, 1]]
+
     def __init__(self, width=8, height=8):
         self.width = width
         self.height = height
 
-        self.middleTopLeft = [((width / 2) - 1), ((height / 2) - 1)]
-        self.middleTopRight = [(width / 2), (height / 2) - 1]
-        self.middleBottomLeft = [((width / 2) - 1), (height / 2)]
-        self.middleBottomRight = [(width / 2), (height / 2)]
+        # Set players and colors
+        self.player1 = Player(self.BLACK)
+        self.player2 = Player(self.WHITE)
 
+        # Start game as black
+        self.cur_player = self.player1
+        self.cur_enemy = self.player2
+
+        self.game_state = 'PLAYING'
+
+        # Create the board matrix
         self.board = []
 
-    def import_board(self, user_board):
-        for i in range(self.height):
-            self.board.append(user_board[i])
+        for i in range(height):
+            self.board.append([' '] * width)
 
-    def make_start_board(self):
-        i = 0
-        j = 0
-        temp_array = []
+        # Place starting tiles
+        self.board[int((height / 2) - 1)][int((width / 2) - 1)] = self.player1.color
+        self.board[int(height / 2)][int((width / 2) - 1)] = self.player2.color
+        self.board[int((height / 2) - 1)][int(width / 2)] = self.player2.color
+        self.board[int(height / 2)][int(width / 2)] = self.player1.color
 
-        for i in range(self.height):
-            for j in range(self.width):
-                temp_array.append(' ')
-                j += 1
-
-            self.board.append(temp_array)
-            temp_array = []
-            j = 0
-            i += 1
-
-        self.board[int((self.height / 2) - 1)][int((self.width / 2) - 1)] = 'b'
-        self.board[int(self.height / 2)][int((self.width / 2) - 1)] = 'w'
-        self.board[int((self.height / 2) - 1)][int(self.width / 2)] = 'w'
-        self.board[int(self.height / 2)][int(self.width / 2)] = 'b'
-
+    # Prints board to console
     def print_board(self):
-        i = 0
-
         for i in range(self.height):
             print(self.board[i])
-            i += 1
 
-    # Check validity of player turn and update tiles player takes with the move
-    # RETURNS: false if error occurs
-    # UPDATES: updates board array according to new move
-    def make_turn(self, player, x, y):
-        # Check if move is possible (within board range and not already taken)
-        if not self.move_on_board_check(x, y) or self.board[y][x] != ' ':
-            return False
-
-        # Set player selection for now
-        self.board[y][x] = player
-
-        # Set enemy tile
-        if player == 'b':
-            enemy = 'w'
-        elif player == 'w':
-            enemy = 'b'
+    # Changes current active player
+    def change_cur_player(self):
+        if self.cur_player == self.player1:
+            self.cur_player = self.player2
+            self.cur_enemy = self.player1
         else:
-            self.board[y][x] = ' '  # Resets player selection
+            self.cur_player = self.player1
+            self.cur_enemy = self.player2
+
+    # Check position is within range of board
+    def is_move_on_board(self, x, y):
+        return 0 <= x < self.width and 0 <= y < self.height
+
+    # Check is user move is valid
+    def is_move_possible(self, x, y):
+        # Check if move is on the board
+        if not self.is_move_on_board(x, y):
             return False
 
-        tile_changes = []
+        # Check if tile picked is empty
+        if not self.board[y][x] == ' ':
+            return False
 
-        # Check what tiles need to be changed in all 8 directions from selection
-        for x_dir, y_dir in [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]]:
+        # Check tiles in all directions from selection
+        for x_dir, y_dir in self.DIRECTIONS:
             x_pos, y_pos = x, y
             x_pos += x_dir
             y_pos += y_dir
 
-            if not self.move_on_board_check(x, y):
+            # Check if next tile in board and enemy
+            if self.board[y_pos][x_pos] == self.cur_player.color or \
+                    not self.is_move_on_board(x_pos, y_pos):
                 continue
 
-            while self.board[y_pos][x_pos] == enemy:
+            # Continues while still enemies
+            while self.board[y_pos][x_pos] == self.cur_enemy.color:
                 x_pos += x_dir
                 y_pos += y_dir
 
-                if not self.move_on_board_check(x, y):
-                    break
-                    
-            if self.board[y_pos][x_pos] == player:
-                while x_pos != (x-1) and y_pos != (y-1):
-                    x_pos -= x_dir
-                    y_pos -= y_dir
+                # Valid move found
+                if self.board[y_pos][x_pos] == self.cur_player.color:
+                    return True
 
-                    tile_changes.append([player, x_pos, y_pos])
+        return False    # No valid move found
 
-        # If no tile changes then the move is invalid
-        if len(tile_changes) == 0:
-            self.board[y][x] = ' '
+    def make_move(self, x, y):
+        # Check if game is playing and move is legal
+        if self.game_state != 'PLAYING':
+            return False
+        if not self.is_move_possible(x, y):
             return False
 
-        for tile in tile_changes:
-            self.board[tile[2]][tile[1]] = tile[0]
+        # Store gained tiles before checking in every dir
+        gained_tiles = []
+        for x_dir, y_dir in self.DIRECTIONS:
+            x_pos, y_pos = x, y
+            x_pos += x_dir
+            y_pos += y_dir
 
-        return tile_changes
+            # Jump over enemy tiles
+            temp_array = []
+            while self.board[y_pos][x_pos] == self.cur_enemy.color:
+                temp_array.append([x_pos, y_pos])
+                x_pos += x_dir
+                y_pos += y_dir
 
-    def move_on_board_check(self, x, y):
-        return 0 <= x <= self.width - 1 and 0 <= y <= self.height - 1
+            # Player tile after enemy tiles
+            if self.board[y_pos][x_pos] == self.cur_player.color:
+                for tiles in temp_array:
+                    gained_tiles.append(tiles)  # Taken tile found
 
-    def clone_board(self):
-        return self.board
+        gained_tiles.append([x, y]) # Original move
+        print(gained_tiles)
+        # Set tiles on board
+        for tiles in gained_tiles:
+            self.board[tiles[1]][tiles[0]] = self.cur_player.color
 
-    # def check_win(self):
+        # Calculates score of each player after move
+        temp_score1 = 0
+        temp_score2 = 0
+        for i in range(self.height):
+            for j in range(self.width):
+                if self.board[i][j] == 'b':
+                    temp_score1 += 1
+                if self.board[i][j] == 'w':
+                    temp_score2 += 1
+        self.player1.score = temp_score1
+        self.player2.score = temp_score2
+
+        # Check games state and change player turn
+        self.game_state = self.check_game_state()
+        self.change_cur_player()
+
+    #def check_game_state(self):
 
 
-game_width = 8
-game_height = 8
 
-board = Board(game_width, game_height)
-board.make_start_board()
-board.print_board()
-print("\n")
+testBoard = ReversiBoard()
+testBoard.print_board()
+result = testBoard.make_move(3, 5)
+print(result)
+testBoard.print_board()
+print(testBoard.player1.score)
+print(testBoard.player2.score)
 
-output = board.make_turn('b', 3, 5)
-board.print_board()
-print(output)
+result = testBoard.make_move(2, 5)
+print(result)
+testBoard.print_board()
+print(testBoard.player1.score)
+print(testBoard.player2.score)
 
-output = board.make_turn('w', 2, 5)
-board.print_board()
-print(output)
-
-output = board.make_turn('b', 2, 4)
-board.print_board()
-print(output)
-
-output = board.make_turn('w', 2, 5)
-board.print_board()
-print(output)
-
-# event_json = json(player, move_x, move_y)
-# response_json = json(tile_states)
-# output_json.player = player
-# output_json.move_x = move_x   
+result = testBoard.make_move(4, 2)
+print(result)
+testBoard.print_board()
+print(testBoard.player1.score)
+print(testBoard.player2.score)
