@@ -1,4 +1,5 @@
-import json
+# Reversi (Othello) Model
+# Coordinates are [0,0] in the top left of the board
 
 class Player:
     def __init__(self, color):
@@ -73,9 +74,12 @@ class ReversiBoard:
             x_pos += x_dir
             y_pos += y_dir
 
-            # Check if next tile in board and enemy
-            if self.board[y_pos][x_pos] == self.cur_player.color or \
-                    not self.is_move_on_board(x_pos, y_pos):
+            # Check if tile is on board
+            if not self.is_move_on_board(x_pos, y_pos):
+                continue
+
+            # Check if next tile is an enemy
+            if self.board[y_pos][x_pos] == self.cur_player.color:
                 continue
 
             # Continues while still enemies
@@ -105,15 +109,20 @@ class ReversiBoard:
 
             # Jump over enemy tiles
             temp_array = []
-            while self.board[y_pos][x_pos] == self.cur_enemy.color:
-                temp_array.append([x_pos, y_pos])
-                x_pos += x_dir
-                y_pos += y_dir
+            if self.is_move_on_board(x_pos, y_pos):
+                while self.board[y_pos][x_pos] == self.cur_enemy.color:
+                    temp_array.append([x_pos, y_pos])
+                    x_pos += x_dir
+                    y_pos += y_dir
 
-            # Player tile after enemy tiles
-            if self.board[y_pos][x_pos] == self.cur_player.color:
-                for tiles in temp_array:
-                    gained_tiles.append(tiles)  # Taken tile found
+                    if not self.is_move_on_board(x_pos, y_pos):
+                        break
+
+                # Player tile after enemy tiles
+                if self.is_move_on_board(x_pos, y_pos):
+                    if self.board[y_pos][x_pos] == self.cur_player.color:
+                        for tiles in temp_array:
+                            gained_tiles.append(tiles)  # Taken tile found
 
         gained_tiles.append([x, y]) # Original move
         print(gained_tiles)
@@ -137,26 +146,66 @@ class ReversiBoard:
         self.game_state = self.check_game_state()
         self.change_cur_player()
 
-    #def check_game_state(self):
+    def possible_moves(self):
+        moves = []
 
+        for i in range(self.height):
+            for j in range(self.width):
+                if self.is_move_possible(j, i):
+                    moves.append([j, i])
 
+        return moves
+
+    def check_game_state(self):
+        # Check if current player has no possible moves
+        if len(self.possible_moves()) == 0:
+            self.change_cur_player()
+
+            # Check if next player has no possible moves
+            if not self.possible_moves():
+                # Change the game state
+                if self.player1.score > self.player2.score:
+                    return 'BLACK_WIN'
+                elif self.player2.score > self.player1.score:
+                    return 'WHITE_WIN'
+                else:
+                    return 'TIE'
+
+        # Game is still active and players have moves
+        return 'PLAYING'
 
 testBoard = ReversiBoard()
-testBoard.print_board()
-result = testBoard.make_move(3, 5)
-print(result)
-testBoard.print_board()
-print(testBoard.player1.score)
-print(testBoard.player2.score)
+#testBoard.print_board()
+#result = testBoard.make_move(3, 5)
+#print(result)
+#testBoard.print_board()
+#print(testBoard.player1.score)
+#print(testBoard.player2.score)
 
-result = testBoard.make_move(2, 5)
-print(result)
-testBoard.print_board()
-print(testBoard.player1.score)
-print(testBoard.player2.score)
+#result = testBoard.make_move(2, 5)
+#print(result)
+#testBoard.print_board()
+#print(testBoard.player1.score)
+#print(testBoard.player2.score)
 
-result = testBoard.make_move(4, 2)
+#result = testBoard.make_move(4, 2)
+#print(result)
+#testBoard.print_board()
+#print(testBoard.player1.score)
+#print(testBoard.player2.score)
+
+testBoard.board = [['b', 'b', 'b', 'b', 'w', 'w', 'w', ' '],
+                   ['w', 'w', 'w', 'b', 'b', 'b', 'w', 'w'],
+                   ['w', 'w', 'w', 'w', 'w', 'w', 'b', 'w'],
+                   ['w', 'w', 'w', 'b', 'w', 'w', 'w', 'w'],
+                   ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w'],
+                   ['w', 'w', 'w', 'b', 'w', 'b', 'b', 'b'],
+                   ['w', 'w', 'w', 'w', 'w', 'b', 'b', 'b'],
+                   ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w']]
+
+result = testBoard.make_move(7, 0)
 print(result)
 testBoard.print_board()
 print(testBoard.player1.score)
 print(testBoard.player2.score)
+print(testBoard.game_state)
