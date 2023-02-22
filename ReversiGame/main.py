@@ -124,7 +124,7 @@ class ReversiBoard:
                         for tiles in temp_array:
                             gained_tiles.append(tiles)  # Taken tile found
 
-        gained_tiles.append([x, y]) # Original move
+        gained_tiles.append([x, y])     # Original move
         print(gained_tiles)
         # Set tiles on board
         for tiles in gained_tiles:
@@ -174,38 +174,15 @@ class ReversiBoard:
         # Game is still active and players have moves
         return 'PLAYING'
 
-testBoard = ReversiBoard()
-#testBoard.print_board()
-#result = testBoard.make_move(3, 5)
-#print(result)
-#testBoard.print_board()
-#print(testBoard.player1.score)
-#print(testBoard.player2.score)
-
-#result = testBoard.make_move(2, 5)
-#print(result)
-#testBoard.print_board()
-#print(testBoard.player1.score)
-#print(testBoard.player2.score)
-
-#result = testBoard.make_move(4, 2)
-#print(result)
-#testBoard.print_board()
-#print(testBoard.player1.score)
-#print(testBoard.player2.score)
-
-testBoard.board = [['b', 'b', 'b', 'b', 'w', 'w', 'w', ' '],
-                   ['w', 'w', 'w', 'b', 'b', 'b', 'w', 'w'],
-                   ['w', 'w', 'w', 'w', 'w', 'w', 'b', 'w'],
-                   ['w', 'w', 'w', 'b', 'w', 'w', 'w', 'w'],
-                   ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w'],
-                   ['w', 'w', 'w', 'b', 'w', 'b', 'b', 'b'],
-                   ['w', 'w', 'w', 'w', 'w', 'b', 'b', 'b'],
-                   ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w']]
-
-result = testBoard.make_move(7, 0)
-print(result)
-testBoard.print_board()
-print(testBoard.player1.score)
-print(testBoard.player2.score)
-print(testBoard.game_state)
+    def game_info(self):
+        color_map = {
+            "b": "player1",
+            "w": "player2"
+        }
+        return {
+            "board": self.print_board(),
+            "current_player": color_map[self.cur_player.color],
+            "game_state": self.game_state,
+            "player1_score": self.player1.score,
+            "player2_score": self.player2.score
+        }
