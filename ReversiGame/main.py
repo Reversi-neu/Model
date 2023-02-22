@@ -4,7 +4,7 @@
 class Player:
     def __init__(self, color):
         self.color = color
-        self.score = 0
+        self.score = 2
 
 class ReversiBoard(dict):
     BLACK = 'b'
@@ -91,6 +91,10 @@ class ReversiBoard(dict):
                 x_pos += x_dir
                 y_pos += y_dir
 
+                # Check if tile is on board
+                if not self.is_move_on_board(x_pos, y_pos):
+                    break
+
                 # Valid move found
                 if self.board[y_pos][x_pos] == self.cur_player.color:
                     return True
@@ -146,8 +150,8 @@ class ReversiBoard(dict):
         self.player2.score = temp_score2
 
         # Check games state and change player turn
-        self.game_state = self.check_game_state()
         self.change_cur_player()
+        self.game_state = self.check_game_state()
 
     def possible_moves(self):
         moves = []
