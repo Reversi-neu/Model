@@ -6,7 +6,7 @@ class Player:
         self.color = color
         self.score = 0
 
-class ReversiBoard:
+class ReversiBoard(dict):
     BLACK = 'b'
     WHITE = 'w'
     EMPTY = ' '
@@ -39,11 +39,15 @@ class ReversiBoard:
         self.board[int(height / 2)][int((width / 2) - 1)] = self.player2.color
         self.board[int((height / 2) - 1)][int(width / 2)] = self.player2.color
         self.board[int(height / 2)][int(width / 2)] = self.player1.color
-
-    # Prints board to console
-    def print_board(self):
-        for i in range(self.height):
-            print(self.board[i])
+        dict.__init__(self,
+                      width=width,
+                      height=height,
+                      current_player=self.cur_player.color,
+                      current_player_score=self.cur_player.score,
+                      current_enemy=self.cur_enemy.color,
+                      current_enemy_score=self.cur_enemy.score,
+                      game_state=self.game_state,
+                      board=self.board)
 
     # Changes current active player
     def change_cur_player(self):
@@ -125,7 +129,6 @@ class ReversiBoard:
                             gained_tiles.append(tiles)  # Taken tile found
 
         gained_tiles.append([x, y])     # Original move
-        print(gained_tiles)
         # Set tiles on board
         for tiles in gained_tiles:
             self.board[tiles[1]][tiles[0]] = self.cur_player.color
@@ -180,7 +183,7 @@ class ReversiBoard:
             "w": "player2"
         }
         return {
-            "board": self.print_board(),
+            "board": self.board,
             "current_player": color_map[self.cur_player.color],
             "game_state": self.game_state,
             "player1_score": self.player1.score,
