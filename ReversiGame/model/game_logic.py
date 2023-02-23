@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 class GameLogic(ABC):
     def __init__(self):
+        self.size = 8
         pass
 
     @abstractmethod
