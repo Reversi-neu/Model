@@ -1,6 +1,6 @@
-from player import Player
-from board import Board
-from classic_mode import ClassicMode
+from model.player import Player
+from model.board import Board
+from model.classic_mode import ClassicMode
 
 class Reversi:
     def __init__(self, size=8, game_logic=ClassicMode()):
