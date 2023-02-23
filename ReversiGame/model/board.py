@@ -1,4 +1,4 @@
-from player import Player
+from model.player import Player
 
 class Board:
     def __init__(self, size):
