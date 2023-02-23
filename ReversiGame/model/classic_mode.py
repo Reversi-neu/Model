@@ -1,4 +1,4 @@
-from game_logic import GameLogic
+from model.game_logic import GameLogic
 
 class ClassicMode(GameLogic):
     DIRECTIONS = [[0, 1], [1, 1], [1, 0], [1, -1],
