@@ -1,5 +1,5 @@
-from game import Reversi
-from view import ConsoleGameView
+from model/game import Reversi
+from view/view import ConsoleGameView
 
 class GameController():
     
