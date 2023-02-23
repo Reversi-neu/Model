@@ -46,11 +46,5 @@ class GameController():
         current_board = self.game.board.get_grid()
         current_player = self.game.cur_player.value
         self.view.print_board(current_board, current_player)
-        self.view.print_winner(self.game.player1_score, self.game.player2_score) 
-
-if __name__ == '__main__':
-    controller = GameController()
-    controller.run_game()
-
-# 
+        self.view.print_winner(self.game.player1_score, self.game.player2_score)  
 
