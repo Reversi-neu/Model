@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 class GameLogic(ABC):
     def __init__(self):
         self.size = 8
-        pass
 
     @abstractmethod
     def get_size(self, s):
