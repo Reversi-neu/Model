@@ -1,0 +1,104 @@
+.App {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.board {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background-color: #fff;
+    table-layout: fixed;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    height: 90vh;
+    aspect-ratio: 1/1;
+
+    tbody {
+        display: table-row-group;
+        vertical-align: middle;
+        border-color: inherit;
+        border-radius: 10px;
+    }
+
+    tr {
+        display: table-row;
+        vertical-align: inherit;
+        border-color: inherit;
+        width: fit-content;
+    }
+
+    td {
+        display: table-cell;
+        vertical-align: inherit;
+        border-color: inherit;
+        padding: 0;
+        margin: 0;
+        border: 0;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000;
+        background-color: #fff;
+        // cursor: pointer;
+        transition: all 0.1s ease-in-out;
+        // border: 1px solid #444444;
+        // box-sizing: border-box;
+        // -moz-box-sizing: border-box;
+        // -webkit-box-sizing: border-box;
+
+        &:hover {
+            // lighten whatever current background color is
+            filter: brightness(75%);
+        }
+    }
+}
+
+.player {
+    border-radius: 50%;
+    width: 80%;
+    height: 80%;
+    margin: auto;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+.settings {
+    transition: width 0.5s, height 0.5s, opacity 0.5s;
+    border-radius: 15px;
+    background-color: #f1f1f1;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    text-align: left;
+    padding: 0px 10px 20px;
+    display: flex;
+    flex-direction: column;
+
+    label {
+        color: black;
+        font-size: 1rem;
+    }
+}
+
+.rotate {
+    animation: rotate 0.5s;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(180deg);
+    }
+}
