@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import "../App.scss"
-import { useToken } from "../hooks/useToken";
+import { useToken } from "../hooks/use_token";
 
 export function Title() {
     const { token, setToken } = useToken();

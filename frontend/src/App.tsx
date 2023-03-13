@@ -3,11 +3,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Title } from './components/title';
 import { Board } from './components/board/board';
 import { Login } from './components/login';
-import { useToken } from './hooks/useToken';
+import { useToken } from './hooks/use_token';
 import { Settings } from './components/settings';
 import { Icons } from './components/icons';
-import { LocalMenu } from './components/localMenu';
-import { OnlineMenu } from './components/onlineMenu';
+import { LocalMenu } from './components/local_menu';
+import { OnlineMenu } from './components/online_menu';
 
 function App() {
   const { token, setToken } = useToken();

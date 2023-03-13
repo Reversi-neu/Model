@@ -1,5 +1,5 @@
 import React from 'react';
-import { loginUser } from '../services/user.service';
+import { loginUser } from '../services/user_service';
 
 interface State {
     username: string;

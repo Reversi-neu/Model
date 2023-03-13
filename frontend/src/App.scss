@@ -49,5 +49,10 @@ a {
   .icon {
     margin: 0 1rem;
     color: white;
+
+    // on click
+    &:active {
+      color: #61dafb;
+    }
   }
 }
