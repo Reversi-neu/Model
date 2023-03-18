@@ -1,6 +1,9 @@
+// global constants
+$background_color: #282c34;
+
 .App {
   text-align: center;
-  background-color: #282c34;
+  background-color: $background_color;
   min-height: 100vh;
 }
 
@@ -35,24 +38,20 @@ a {
   color: #61dafb;
 }
 
-.icons {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(3rem);
-  position: absolute;
-  top: 0;
-  left: 0;
-  cursor: pointer;
+@keyframes rotate {
+  from {
+      transform: rotate(0deg);
+  }
+  to {
+      transform: rotate(180deg);
+  }
+}
 
-  .icon {
-    margin: 0 1rem;
-    color: white;
-
-    // on click
-    &:active {
-      color: #61dafb;
-    }
+@keyframes shrink {
+  from {
+      transform: scale(1);
+  }
+  to {
+      transform: scale(0.8);
   }
 }

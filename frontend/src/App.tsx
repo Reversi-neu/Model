@@ -5,7 +5,7 @@ import { Board } from './components/board/board';
 import { Login } from './components/login';
 import { useToken } from './hooks/use_token';
 import { Settings } from './components/settings';
-import { Icons } from './components/icons';
+import { Sidebar } from './components/sidebar/sidebar';
 import { LocalMenu } from './components/local_menu';
 import { OnlineMenu } from './components/online_menu';
 
@@ -14,7 +14,7 @@ function App() {
   
   return (
     <BrowserRouter>
-      <Icons/>
+      <Sidebar/>
       <Routes>
         <Route path="*" element={
           <Title/>
