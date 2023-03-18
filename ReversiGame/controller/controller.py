@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import jsonify #json serializer
 from model.game import Reversi
 from view.view import ConsoleGameView
 
@@ -63,13 +64,13 @@ class GameController():
         # if guest frontend please return null username and password. 
         # if username password empty = guest;
         # need to make another file to store userinfomation so I can referance
-            return "<p>Test</p>"
+            return jsonify(username = 'variable', elo = 'elo', status='Wrong Password/LoggedIn')
 
         @app.route("/make_move")
         def make_move(game_ID, x_pos, y_pos, current_player)
         # check if valid move first if not valid return invalid move (is_move_possible)
         # make_move(x, y)
-            return "<p>New Board as a JSON</p>"
+            return jsonify(gameid = '2354', board='newBoardObject', status='Move Executed/Move OutOfBound')
         
         @app.route("/possible_moves")
         def possible_moves(game_ID)
@@ -77,19 +78,19 @@ class GameController():
         # check with model possible moves possible_moves(self)
         # make JSON for front end
         # check for possible moves and return JSON of possible moves so the front end can display all possible moves by player highlighted
-            return "<p>Possible Moves as a JSON</p>"
+            return jsonify(gameid = '234', possibleMovesBoard = 'possibleMovesBoard', turn = 'cur_player')
 
         @app.route("/game_state")# this will serve as a function to look for games
         def game_state(game_ID)
-            return "<p>Game is Awaiting players, or Game Started (With players turn)</p>"
+            return jsonify(gameid = '2354', turn = 'cur_player', status = '0 = awaiting player/ 1-2 = players turn')
 
         @app.route("/create_game")# do we create games with one player and put them on a lobby for others to join, or do we create the games with the two usernames
         def create_game(player1, player2)
-            return "<p>Game ID</p>"
+            return jsonify(gameid = '2354', status = '0 = awaiting player/ 1-2 = players turn')
 
         @app.route("/join_game")
         def join_game(game_ID, player_joining)
         # join player to game_ID and send empty board to start, also return starting player
-            return "<p>Empty Board as JSON</p>"
+            return jsonify(gameid = '2354', status = '0 = awaiting player/ 1-2 = players turn')
 
 
