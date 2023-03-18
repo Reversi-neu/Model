@@ -12,6 +12,7 @@ import { LobbyManager } from './components/lobbies_manager';
 
 function App() {
   const { token, setToken } = useToken();
+  console.log(process.env)
   
   return (
     <BrowserRouter>

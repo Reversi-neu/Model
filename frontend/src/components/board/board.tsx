@@ -46,11 +46,11 @@ export class Board extends React.Component<Props, State> {
             board: this.exampleBoard,
             winner: 0,
             playerTurn: 1,
+            // ui stuff
             player1Color: "#000000",
             player2Color: "#FFF",
             boardColor1: "#769656",
             boardColor2: "#eeeed2",
-            // ui stuff
             showSettings: false,
             rotateIcon: false
         }

@@ -21,17 +21,17 @@ export class Login extends React.Component<Props, State> {
 
     render(): React.ReactNode {
         const handleSubmit = async (e : any) => {
-            console.log(e)
             e.preventDefault();
 
             const token = await loginUser({
                 username: this.state.username,
                 password: this.state.password
             });
-            this.props.setToken(token);
+            console.log(token)
+            // this.props.setToken(token);
 
             // redirect to home
-            window.location.href = "/";
+            // window.location.href = "/";
         }
         
         return(
