@@ -13,44 +13,45 @@ class GameController():
         self.game = Reversi(width)
 
     def run_game(self):
-        while self.game.check_win() == False:
+        
+        # while self.game.check_win() == False:
             
-            #game_info = self.game.game_info()
-            current_board = self.game.board.get_grid()
-            board_size = self.game.board_size
-            current_player = self.game.cur_player.value
-            player1_score = self.game.player1_score
-            player2_score = self.game.player2_score
+        #     #game_info = self.game.game_info()
+        #     current_board = self.game.board.get_grid()
+        #     board_size = self.game.board_size
+        #     current_player = self.game.cur_player.value
+        #     player1_score = self.game.player1_score
+        #     player2_score = self.game.player2_score
             
-            if len(self.game.possible_moves()) != 0:
-                self.view.print_board(current_board, current_player)
-                self.view.print_moves(self.game.possible_moves())
+        #     if len(self.game.possible_moves()) != 0:
+        #         self.view.print_board(current_board, current_player)
+        #         self.view.print_moves(self.game.possible_moves())
                 
-                error = False
-                while not error:
-                    row, col = self.view.get_user_input()
-                    error = self.game.is_valid_move([col, row])  
+        #         error = False
+        #         while not error:
+        #             row, col = self.view.get_user_input()
+        #             error = self.game.is_valid_move([col, row])  
 
-                    if error == False:
-                        self.view.print_invalid_move()
+        #             if error == False:
+        #                 self.view.print_invalid_move()
                         
-                self.game.make_move([col, row])
-                self.game.change_cur_player()
+        #         self.game.make_move([col, row])
+        #         self.game.change_cur_player()
 
-            else:
-                # changing player no possible moves 
-                self.game.change_cur_player()
-                continue
+        #     else:
+        #         # changing player no possible moves 
+        #         self.game.change_cur_player()
+        #         continue
                 
-            self.view.print_score(player1_score, player2_score)
-            print()
+        #     self.view.print_score(player1_score, player2_score)
+        #     print()
             
         
         current_board = self.game.board.get_grid()
         current_player = self.game.cur_player.value
         self.view.print_board(current_board, current_player)
         self.view.print_winner(self.game.player1_score, self.game.player2_score)
-                #make a game obj that contains board
+        #make a game obj that contains board
 
         #add game obj to array games
 
@@ -70,7 +71,7 @@ class GameController():
         def make_move(game_ID, x_pos, y_pos, current_player)
         # check if valid move first if not valid return invalid move (is_move_possible)
         # make_move(x, y)
-            return jsonify(gameid = '2354', board='newBoardObject', status='Move Executed/Move OutOfBound')
+            return jsonify(gameid = '2354', board='newBoardObject', score1 = 'player1', score2 = 'player2', status='Move Executed/Move OutOfBound')
         
         @app.route("/possible_moves")
         def possible_moves(game_ID)
@@ -85,12 +86,22 @@ class GameController():
             return jsonify(gameid = '2354', turn = 'cur_player', status = '0 = awaiting player/ 1-2 = players turn')
 
         @app.route("/create_game")# do we create games with one player and put them on a lobby for others to join, or do we create the games with the two usernames
-        def create_game(player1, player2)
-            return jsonify(gameid = '2354', status = '0 = awaiting player/ 1-2 = players turn')
+        def create_game(player1, player2, width)
+            id = random
+            games[ID] = new Reversi(width)
+            return jsonify(gameid = '2354', size = '8', status = '0 = awaiting player/ 1-2 = players turn')
 
         @app.route("/join_game")
         def join_game(game_ID, player_joining)
         # join player to game_ID and send empty board to start, also return starting player
-            return jsonify(gameid = '2354', status = '0 = awaiting player/ 1-2 = players turn')
+            return jsonify(gameid = '2354', board='board array', status = '0 = awaiting player/ 1-2 = players turn')
+
+        @app.route("/postgame")
+        def postgame(gameID)
+            return jsonify(gameID = '3542', score1 = 'player1', score2 = 'player2',)
+
+        @app.route("/heartbeat")
+        def heartbeat()
+            return jsonify(ping= 'PONG!')
 
 
