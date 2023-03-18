@@ -2,9 +2,10 @@ import React from "react";
 import './board.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
-import { CompactPicker, SketchPicker } from 'react-color';
+import { CompactPicker } from 'react-color';
 
 interface State {
+    id: number;
     gameType: GameType;
     board: number[][];
     winner: number; // 0 = no winner, 1 = player 1, 2 = player 2
@@ -38,19 +39,22 @@ export class Board extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
+        const { gameType, id } = getGameInfoFromURL();
         this.state = {
-            gameType: matchUrlToGameType(),
+            id: id,
+            gameType: gameType,
             board: this.exampleBoard,
             winner: 0,
             playerTurn: 1,
+            // ui stuff
             player1Color: "#000000",
             player2Color: "#FFF",
             boardColor1: "#769656",
             boardColor2: "#eeeed2",
-            // ui stuff
             showSettings: false,
             rotateIcon: false
         }
+        console.log(this.state)
     }
 
     render(): React.ReactNode {
@@ -96,62 +100,68 @@ export class Board extends React.Component<Props, State> {
                         }
                         </tbody>
                     </table>
-                    <div style={{
-                        color: 'white',
-                        margin: '10px',
-                        fontSize: '2em',
-                        cursor: 'pointer',
-                        position: 'absolute',
-                        top: '20px',
-                        right: '0',
-                    }}>
-                        <FontAwesomeIcon 
-                            className={ this.state.rotateIcon ? "rotate" : ""}
-                            style={{ boxShadow: '0 0 10px 0 rgba(0,0,0,0.5)', borderRadius: '15px', padding: '10px', backgroundColor: '#282c34' }}
-                            icon={faGear} 
-                            onClick={() => this.setState({showSettings: !this.state.showSettings, rotateIcon: true})}
-                            onAnimationEnd={() => this.setState({ rotateIcon: false })}
-                        />
-                        <div className="settings"
-                            style={{ 
-                                width: this.state.showSettings ? '250px' : '0px',
-                                height: this.state.showSettings ? 'fit-content' : '0px',
-                                opacity: this.state.showSettings ? '1' : '0',
-                            }}
-                        >
-                            <span>
-                                <label>Player 1 Color</label>
-                                <CompactPicker
-                                    color={ this.state.player1Color }
-                                    onChangeComplete={ (color) => this.setState({ player1Color: color.hex }) }
-                                />
-                            </span>
-                            <span>
-                                <label>Player 2 Color</label>
-                                <CompactPicker
-                                    color={ this.state.player2Color }
-                                    onChangeComplete={ (color) => this.setState({ player2Color: color.hex }) }
-                                />
-                            </span>
-                            <span>
-                                <label>Board Color 1</label>
-                                <CompactPicker
-                                    color={ this.state.boardColor1 }
-                                    onChangeComplete={ (color) => this.setState({ boardColor1: color.hex }) }
-                                />
-                            </span>
-                            <span>
-                                <label>Board Color 2</label>
-                                <CompactPicker
-                                    color={ this.state.boardColor2 }
-                                    onChangeComplete={ (color) => this.setState({ boardColor2: color.hex }) }
-                                />
-                            </span>
-                        </div>
-                    </div>
+                    { this.renderSettings() }
                 </div>
             </div>
         );
+    }
+
+    renderSettings(): React.ReactNode {
+        return (
+            <div style={{
+                color: 'white',
+                margin: '10px',
+                fontSize: '2em',
+                cursor: 'pointer',
+                position: 'absolute',
+                top: '20px',
+                right: '0',
+            }}>
+                <FontAwesomeIcon 
+                    className={ this.state.rotateIcon ? "rotate" : ""}
+                    style={{ boxShadow: '0 0 10px 0 rgba(0,0,0,0.5)', borderRadius: '15px', padding: '10px', backgroundColor: '#282c34' }}
+                    icon={faGear} 
+                    onClick={() => this.setState({showSettings: !this.state.showSettings, rotateIcon: true})}
+                    onAnimationEnd={() => this.setState({ rotateIcon: false })}
+                />
+                <div className="settings"
+                    style={{ 
+                        width: this.state.showSettings ? '250px' : '0px',
+                        height: this.state.showSettings ? 'fit-content' : '0px',
+                        opacity: this.state.showSettings ? '1' : '0',
+                    }}
+                >
+                    <span>
+                        <label>Player 1 Color</label>
+                        <CompactPicker
+                            color={ this.state.player1Color }
+                            onChangeComplete={ (color) => this.setState({ player1Color: color.hex }) }
+                        />
+                    </span>
+                    <span>
+                        <label>Player 2 Color</label>
+                        <CompactPicker
+                            color={ this.state.player2Color }
+                            onChangeComplete={ (color) => this.setState({ player2Color: color.hex }) }
+                        />
+                    </span>
+                    <span>
+                        <label>Board Color 1</label>
+                        <CompactPicker
+                            color={ this.state.boardColor1 }
+                            onChangeComplete={ (color) => this.setState({ boardColor1: color.hex }) }
+                        />
+                    </span>
+                    <span>
+                        <label>Board Color 2</label>
+                        <CompactPicker
+                            color={ this.state.boardColor2 }
+                            onChangeComplete={ (color) => this.setState({ boardColor2: color.hex }) }
+                        />
+                    </span>
+                </div>
+            </div>
+        )
     }
 }
 
@@ -161,18 +171,10 @@ export enum GameType {
     Local = "local"
 }
 
-function matchUrlToGameType(): GameType {
+function getGameInfoFromURL(): { gameType: GameType, id: number } {
     const url = window.location.pathname;
-    const split = url.split("/");
-    const gameType = split[split.length - 1];
-    switch (gameType) {
-        case GameType.Online:
-            return GameType.Online;
-        case GameType.AI:
-            return GameType.AI;
-        case GameType.Local:
-            return GameType.Local;
-        default:
-            return GameType.Online;
-    }
+    const urlSplit = url.split('/');
+    const gameType = urlSplit[2];
+    const gameId = urlSplit[3];
+    return {gameType: gameType as GameType, id: parseInt(gameId)};
 }

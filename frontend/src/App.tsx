@@ -8,9 +8,11 @@ import { Settings } from './components/settings';
 import { Sidebar } from './components/sidebar/sidebar';
 import { LocalMenu } from './components/local_menu';
 import { OnlineMenu } from './components/online_menu';
+import { LobbyManager } from './components/lobbies_manager';
 
 function App() {
   const { token, setToken } = useToken();
+  console.log(process.env)
   
   return (
     <BrowserRouter>
@@ -33,7 +35,10 @@ function App() {
           <LocalMenu/>
           // <Board token={token} gameType={GameType.Local}/>
         }/>
-        <Route path="play/:gameType" element={
+        <Route path="play/:gameType" element={ 
+          <LobbyManager/>
+        }/>
+        <Route path="play/:gameType/:id" element={
           <Board token={token}/>
         }/>
         {/* <Route path="ai" element={
