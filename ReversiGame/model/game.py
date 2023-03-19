@@ -6,7 +6,7 @@ from model.reversi_ai import ReversiAI
 class Reversi:
     # ai_depth 0 means no AI in game
     def __init__(self, size=8, game_logic=ClassicMode(), ai_depth=0): 
-        self.board = Board(size)
+        self.board = Board(size, board=[])
         self.board_size = size
         self.cur_player = Player.black
         self.game_logic = game_logic

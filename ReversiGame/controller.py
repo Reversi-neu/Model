@@ -167,7 +167,7 @@ def createGame():
     # date = datetime.datetime.now()
 
     if (gameType == 'ai') or (gameType == 'local'):
-        reversiBoard = Reversi(size, ai_depth = difficulty) if gameType == 'ai' else Reversi(size)
+        reversiBoard = Reversi(size, ai_depth = difficulty) if gameType == 'ai' else Reversi(size, ai_depth=0)
 
         # this is basically where we define what our 'games' dicts are gonna look like (THIS IS ALL THE STUFF I WANT FOR THE FRONT END, IT GOTTA BE UPDATED W/ THE GAME)
         game = {
@@ -229,7 +229,8 @@ def postgame(gameID):
     data = (player2New, finishTime, player2ID)
     callDB(statement, data)
 
-
+    #remove game from dictionary 
+    game.pop(gameID)
     return 
 # helpers / future routes
 
