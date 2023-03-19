@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import "../App.scss"
 import { useToken } from "../hooks/use_token";
+import { signupGuest } from "../services/user_service";
 
 export function Title() {
     const { token, setToken } = useToken();
@@ -12,8 +13,9 @@ export function Title() {
         window.location.href = "/";
     }
 
-    const handleGuestLogin = () => {
-        setToken("guest");
+    const handleGuestLogin = async () => {
+        const token = await signupGuest();
+        setToken(token.userID);
 
         // redirect to home
         window.location.href = "/";
@@ -36,10 +38,10 @@ export function Title() {
                     !token ?
                         <>
                             <a onClick={handleGuestLogin}>Play As Guest</a>
-                            <Link to="login">Login</Link>
+                            <Link to="login">Sign In</Link>
                         </>
                         :
-                        <Link to="/" onClick={handleLogout}>Logout</Link>
+                        <Link to="/" onClick={handleLogout}>Sign Out</Link>
                 }
             </div>
         </div>

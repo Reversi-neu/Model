@@ -2,12 +2,26 @@ import "../App.scss"
 import { useToken } from "../hooks/use_token";
 import { useParams } from "react-router-dom";
 import { GameType } from "./board/board";
-import { getGamesByType } from "../services/game_service";
+import { getGamesByType, getAIGamesByUserID } from "../services/game_service";
+import React from "react";
 
 export function LobbyManager() {
     const { token } = useToken();
     const { gameType } = useParams<{gameType: string}>() as {gameType: GameType};
-    const games: any[] = [];
+    const [games, setGames] = React.useState<any[]>([]);
+
+    React.useEffect(() => {
+        if (gameType === 'ai') {
+            getAIGamesByUserID(token).then((games) => {
+                console.log(games)
+                setGames(games);
+            });
+        } else {
+            getGamesByType(gameType).then((games) => {
+                setGames(games);
+            });
+        }
+    }, [gameType, token]);
 
     return (
         <div className="App">
