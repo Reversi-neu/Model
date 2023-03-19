@@ -146,6 +146,7 @@ def makeMove():
                 game['game'].make_move(game['game'].get_ai_move())
                 game['game'].change_cur_player()
                 possibleMoves = game['game'].possible_moves()
+                if game['game'].check_win(): break
                 if (len(possibleMoves) == 0):
                     game['game'].change_cur_player()
                 else:
