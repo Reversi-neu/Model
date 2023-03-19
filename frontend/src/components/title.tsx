@@ -44,6 +44,8 @@ export function Title() {
                         :
                         <Link to="/" onClick={handleLogout}>Sign Out</Link>
                 }
+                <small style={{margin: '80px 0 0 0'}}>By <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Jakob</a>
+                , Roberto, and Lucas</small>
             </div>
         </div>
     );

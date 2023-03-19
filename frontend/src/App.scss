@@ -20,6 +20,10 @@ $background_color: #282c34;
   font-family: 'Josefin Sans', sans-serif;
 }
 
+* {
+  font-family: 'Josefin Sans', sans-serif !important;
+}
+
 .App-header {
   display: flex;
   flex-direction: column;
