@@ -1,3 +1,4 @@
+from flask import Flask
 from model import ReversiBoard
 import datetime
 from flask import Flask, jsonify, request

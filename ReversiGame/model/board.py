@@ -1,7 +1,7 @@
 from model.player import Player
 
 class Board:
-    def __init__(self, size):
+    def __init__(self, size, grid=[]):
         self.size = size
         self.board = []
 
@@ -17,3 +17,8 @@ class Board:
     def get_grid(self):
         return self.board
 
+    def copy(self):
+        new_board = Board(self.size)
+        new_board.board = self.board
+        
+        return new_board
