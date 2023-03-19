@@ -24,7 +24,7 @@ export function Sidebar() {
                 setSidebar(true);
             }}
         >
-            <a>
+            <a style={{margin: '5px 5px 5px 0 '}}>
                 <FontAwesomeIcon icon={faBackward} 
                     onClick={() => navigate(-1)}
                 />
