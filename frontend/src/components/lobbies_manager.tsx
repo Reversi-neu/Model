@@ -2,7 +2,7 @@ import "../App.scss"
 import { useToken } from "../hooks/use_token";
 import { Link, useParams } from "react-router-dom";
 import { GameType } from "./board/board";
-import { getGamesByType, getAIGamesByUserID, createGame } from "../services/game_service";
+import { getGamesByType, getGamesByTypeByUserID, createGame } from "../services/game_service";
 import React from "react";
 import Slider from '@mui/material/Slider';
 import { toast, ToastContainer } from "react-toastify";
@@ -19,30 +19,22 @@ export function LobbyManager() {
     }, [gameType, token]);
 
     const handleLobbyRefresh = async () => {
-        if (gameType === 'ai') {
-            getAIGamesByUserID(token).then((games) => {
-                console.log(games)
-                setGames(games);
-            });
-        } else {
-            getGamesByType(gameType).then((games) => {
-                setGames(games);
-            });
-        }
+        getGamesByTypeByUserID(gameType, token).then((games) => {
+            console.log(games)
+            setGames(games);
+        });
     }
 
     const handleCreateGame = async () => {
-        if (gameType === 'ai') {
-            await createGame({
-                player1ID: token,
-                player2ID: 0,
-                gameType: gameType,
-                size: size,
-                difficulty: aiDifficulty,
-            });
-            handleLobbyRefresh();
-            toast.success('Game created!');
-        }
+        await createGame({
+            player1ID: token,
+            player2ID: 0,
+            gameType: gameType,
+            size: size,
+            difficulty: aiDifficulty,
+        });
+        handleLobbyRefresh();
+        toast.success('Game created!');
     };
 
     return (
@@ -73,10 +65,18 @@ export function LobbyManager() {
                                     }}
                                     key={game.id}
                                 >
-                                    <p>
-                                        <u>{ game.player1.username }</u> <em>vs. </em> 
-                                        <u>{ game.player2.username + '-' + (game.difficulty > 0 && game.difficulty) }</u>
-                                    </p>
+                                    {
+                                        (gameType === 'ai' || gameType === 'local') &&
+                                        <p>
+                                            <u>{ game.player1.username }</u> <em>vs. </em> 
+                                            {
+                                                gameType === 'ai' ?
+                                                <u>{ 'AI-' + (game.difficulty > 0 && game.difficulty) }</u>
+                                                :
+                                                <u>LOCAL</u>
+                                            }
+                                        </p>
+                                    }
                                     <p>{ game.size } x { game.size }</p>
                                     <Link to={`/play/${game.type}/${game.id}`}>
                                         Join

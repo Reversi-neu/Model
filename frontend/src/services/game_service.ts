@@ -16,8 +16,8 @@ export async function getGamesByType(type: string) {
     }).then(data => data.json())
 }
 
-export async function getAIGamesByUserID(id: string) {
-    return fetch(process.env.REACT_APP_API_URL! + '/games/ai/' + id, {
+export async function getGamesByTypeByUserID(gameType: string, id: string) {
+    return fetch(process.env.REACT_APP_API_URL! + '/games/' + gameType + '/' + id, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

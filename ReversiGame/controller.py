@@ -103,9 +103,12 @@ def guest():
         'password': rv[0][2],
     })
 
-@app.route('/games/ai/<userID>', methods=['GET'])
-def getAIGamesByUserID(userID):
-    playerGames = copy.deepcopy(list(filter(lambda game: game['player1']['userID'] == int(userID) and game['type'] == 'ai', games)))
+@app.route('/games/<gameType>/<userID>', methods=['GET'])
+def getGamesByTypeByUserID(gameType, userID):
+    playerGames = copy.deepcopy(list(
+        filter(lambda game: (game['player1']['userID'] == int(userID) or game['player2']['userID'] == int(userID)) 
+                and game['type'] == gameType, games)
+    ))
     # need to pop game off here bc its not json serializable
     for game in playerGames:
         game.pop('game')
@@ -115,7 +118,6 @@ def getAIGamesByUserID(userID):
 @app.route('/games/<gameID>', methods=['GET'])
 def getGameByID(gameID):
     game = copy.deepcopy(list(filter(lambda game: game['id'] == int(gameID), games))[0])
-    game.update({'board': game['game'].board.get_grid()})
     game.pop('game')
     return jsonify(game)
 
@@ -126,20 +128,21 @@ def makeMove():
     gameID = requestBody['gameID']
     move = requestBody['move']
 
-    if (gameType == 'ai'):
+    if (gameType == 'ai') or (gameType == 'local'):
         game = list(filter(lambda game: game['id'] == int(gameID), games))[0]
         game['game'].make_move([move["x"], move["y"]])
-        game['game'].make_move(game['game'].get_ai_move())
-        return jsonify({
-            'id': game['id'],
-            'size': game['size'],
-            'gameType': gameType,
-            'difficulty': game['difficulty'],
-            'board': game['game'].board.get_grid(),
-            'winner': game['game'].check_win(),
-            'player1Score': game['game'].player1_score,
-            'player2Score': game['game'].player2_score,
-        })
+        game['game'].change_cur_player()
+        # if (gameType == 'ai'): game['game'].make_move(game['game'].get_ai_move())
+        game['winner'] = game['game'].check_win()
+        game['player1Score'] = game['game'].player1_score
+        game['player2Score'] = game['game'].player2_score
+        game['board'] = game['game'].board.get_grid()
+        game['currentPlayer'] = game['game'].cur_player
+        game['possibleMoves'] = game['game'].possible_moves()
+
+        game_copy = copy.deepcopy(game)
+        game_copy.pop('game')
+        return jsonify(game_copy)
 
 @app.route("/games", methods=['PUT'])# do we create games with one player and put them on a lobby for others to join, or do we create the games with the two usernames
 def createGame():
@@ -154,24 +157,23 @@ def createGame():
     game_id_counter = game_id_counter + 1
     # date = datetime.datetime.now()
 
-    if (gameType == 'ai'):
-        reversiBoard = Reversi(size, ai_depth = difficulty)
-        # this is basically where we define what our 'games' dicts are gonna look like
-        games.append({
-            "id": newId, "game": reversiBoard, "type": 'ai', "size": size, "difficulty": difficulty,
-            "player1": getUserByID(player1ID), "player2": getUserByID(player2ID)
-        })
-        return jsonify({
-            'id': newId,
-            'player1ID': player1ID,
-            'player2ID': player2ID,
-            'size': size,
-            'gameType': gameType,
-            'difficulty': difficulty,
-        })
-    
-    elif (gameType == 'local'):
-        pass
+    if (gameType == 'ai') or (gameType == 'local'):
+        reversiBoard = Reversi(size, ai_depth = difficulty) if gameType == 'ai' else Reversi(size)
+
+        # this is basically where we define what our 'games' dicts are gonna look like (THIS IS ALL THE STUFF I WANT FOR THE FRONT END, IT GOTTA BE UPDATED W/ THE GAME)
+        game = {
+            "id": newId, "game": reversiBoard, "board": reversiBoard.board.get_grid(),
+            "type": gameType, "size": size, "difficulty": difficulty,
+            "player1": getUserByID(player1ID), "player2": getUserByID(player2ID), 
+            "winner": None, "player1Score": 2, "player2Score": 2, 
+            "currentPlayer": 1, "possibleMoves": reversiBoard.possible_moves(),
+        }
+        games.append(game)
+        
+        g_copy = copy.deepcopy(game)
+        g_copy.pop('game')
+        return jsonify(g_copy)
+
     elif (gameType == 'online'):
         pass
 
@@ -180,7 +182,7 @@ def getUserByID(userID):
     if (userID == 0): # AI
         return {
             'userID': 0,
-            'username': 'AI',
+            'username': None,
             'password': None,
         }
 

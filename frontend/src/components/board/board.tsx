@@ -9,10 +9,11 @@ interface State {
     id: number;
     gameType: GameType;
     board: number[][];
-    winner: number; // 0 = no winner, 1 = player 1, 2 = player 2
+    winner: boolean; // 0 = no winner, 1 = player 1, 2 = player 2
     playerTurn: number; // 1 = player 1, 2 = player 2
     player1Score: number;
     player2Score: number;
+    possibleMoves: Number[][];
     player1Color: string;
     player2Color: string;
     boardColor1: string;
@@ -47,10 +48,11 @@ export class Board extends React.Component<Props, State> {
             id: id,
             gameType: gameType,
             board: this.exampleBoard,
-            winner: 0,
+            winner: false,
             playerTurn: 1,
             player1Score: 2,
             player2Score: 2,
+            possibleMoves: [],
             // ui stuff
             player1Color: "#000000",
             player2Color: "#FFF",
@@ -70,7 +72,13 @@ export class Board extends React.Component<Props, State> {
         const game = await getGameByID(this.state.id);
         this.setState({
             board: game.board,
+            player1Score: game.player1Score,
+            player2Score: game.player2Score,
+            possibleMoves: game.possibleMoves,
+            winner: game.winner,
+            playerTurn: game.playerTurn
         })
+        console.log(game, this.state)
     }
 
     async makeMove(row: number, col: number) {
@@ -79,13 +87,12 @@ export class Board extends React.Component<Props, State> {
             move: { x: col, y: row },
             gameType: this.state.gameType
         });
-        console.log(res)
-        if (res.board) {
+        if (res) {
             this.getGameInfo();
-            this.setState({
-                player1Score: res.player1Score,
-                player2Score: res.player2Score,
-            })
+            // this.setState({
+            //     player1Score: res.player1Score,
+            //     player2Score: res.player2Score,
+            // })
         }
     }
 
@@ -94,10 +101,26 @@ export class Board extends React.Component<Props, State> {
             <div className="App">
                 <small>Type: {this.state.gameType.toLocaleUpperCase()}</small>
                 <div className="board">
+                    {
+                        this.state.winner &&
+                            <p style={{
+                                fontSize: '2em',
+                                color: 'white'
+                            }}>
+                                { 
+                                    this.state.player1Score == this.state.player2Score ? 
+                                    "Tie!" :
+                                    this.state.player1Score > this.state.player2Score ?
+                                    "Player 1 Wins!" : "Player 2 Wins!" 
+                                }
+                            </p>
+                    }
                     <p style={{
                         fontSize: '2em',
                         color: 'white'
-                    }}>{ this.state.player1Score } : { this.state.player2Score }</p>
+                    }}>
+                        { this.state.player1Score } : { this.state.player2Score }
+                    </p>
                     <table>
                         <tbody>
                         {
@@ -112,20 +135,39 @@ export class Board extends React.Component<Props, State> {
                                                             backgroundColor: (i + j) % 2 === 0 ? this.state.boardColor1 : this.state.boardColor2,
                                                             borderColor: (i + j) % 2 === 0 ? this.state.boardColor2 : this.state.boardColor1,
                                                         }}
-                                                        onClick={() => this.makeMove(i, j)}
                                                     >
                                                         {
-                                                            col === 0 ? <div className="empty"/> 
+                                                            col === 0 ? 
+                                                            this.state.possibleMoves.some(move => move[0] === j && move[1] === i) ? 
+                                                                    this.state.playerTurn !== 1 ? 
+                                                                    <div 
+                                                                        className="player" 
+                                                                        style={{
+                                                                            backgroundColor: this.state.player1Color,
+                                                                            opacity: 0.3
+                                                                        }}
+                                                                        onClick={() => this.makeMove(i, j)}
+                                                                    /> 
+                                                                    : 
+                                                                    <div 
+                                                                        className="player" 
+                                                                        style={{
+                                                                            backgroundColor: this.state.player2Color,
+                                                                            opacity: 0.3
+                                                                        }}
+                                                                        onClick={() => this.makeMove(i, j)}
+                                                                    />
+                                                                : <div className="empty"/>
                                                             : 
                                                             col === 1 ? 
-                                                            <div className="player" style={{
-                                                                backgroundColor: this.state.player1Color
-                                                            }}/> 
+                                                                <div className="player" style={{
+                                                                    backgroundColor: this.state.player1Color
+                                                                }}/> 
                                                             :
                                                             col === 2 ? 
-                                                            <div className="player" style={{
-                                                                backgroundColor: this.state.player2Color
-                                                            }}/> 
+                                                                <div className="player" style={{
+                                                                    backgroundColor: this.state.player2Color
+                                                                }}/> 
                                                             : 
                                                             null
                                                         }
