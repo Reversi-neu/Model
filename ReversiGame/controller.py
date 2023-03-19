@@ -22,10 +22,58 @@ conn = pymysql.connect(
     db = 'reversidb',       
 )
 
+# helpers / future routes
+def callDB(statement, data):
+    cursor = conn.cursor()
+    cursor.execute(statement, data)
+    rv = cursor.fetchall()
+    conn.commit()
+    cursor.close()
+    return rv
+
+def getUserByID(userID):
+    if (userID == 0): # AI
+        return {
+            'userID': 0,
+            'username': None,
+            'password': None,
+        }
+
+    statement = 'SELECT * FROM users WHERE userID = %s'
+    rv = callDB(statement, (userID))
+
+    if (len(rv) == 0):
+        return None
+
+    return {
+        'userID': rv[0][0],
+        'username': rv[0][1],
+        'password': rv[0][2],
+    }
+
+def getNextUserID():
+    rv = callDB('SELECT MAX(userID) FROM users', ())
+
+    if (len(rv) == 0):
+        return 1
+
+    return rv[0][0] + 1
+
+def getNextGameID():
+    rv = callDB('SELECT MAX(gameID) FROM games', ())
+
+    if (len(rv) == 0):
+        return 1
+
+    return rv[0][0] + 1
+
+# -- global constants
 default_elo = 1000
 games = []
-game_id_counter : int = 0
+game_id_counter : int = getNextGameID()
 
+
+# -- routes
 @app.route('/login', methods=['POST'])
 def login():
     requestBody = request.json
@@ -164,7 +212,8 @@ def createGame():
     size = requestBody['size']
     gameType = requestBody['gameType']
     difficulty = requestBody['difficulty'] or 0
-    newId = getNextGameID()
+    newId = game_id_counter
+    game_id_counter += 1
     # date = datetime.datetime.now()
 
     if (gameType == 'ai') or (gameType == 'local'):
@@ -255,51 +304,6 @@ def postgame(gameID):
         statement = 'UPDATE elo SET elo = %s, lastUpdate=%s WHERE userID = %s'
         data = (player2New, finishTime, aiID)
         callDB(statement, data)
-
-# helpers / future routes
-
-def callDB(statement, data):
-    cursor = conn.cursor()
-    cursor.execute(statement, data)
-    rv = cursor.fetchall()
-    conn.commit()
-    cursor.close()
-    return rv
-
-def getUserByID(userID):
-    if (userID == 0): # AI
-        return {
-            'userID': 0,
-            'username': None,
-            'password': None,
-        }
-
-    statement = 'SELECT * FROM users WHERE userID = %s'
-    rv = callDB(statement, (userID))
-
-    if (len(rv) == 0):
-        return None
-
-    return {
-        'userID': rv[0][0],
-        'username': rv[0][1],
-        'password': rv[0][2],
-    }
-
-def getNextUserID():
-    rv = callDB('SELECT MAX(userID) FROM users', ())
-
-    if (len(rv) == 0):
-        return 1
-
-    return rv[0][0] + 1
-def getNextGameID():
-    rv = callDB('SELECT MAX(gameID) FROM games', ())
-
-    if (len(rv) == 0):
-        return 1
-
-    return rv[0][0] + 1
 
 def eloCalculator(player_elo, enemy_elo, player_score, enemy_score):
     # Variables to customize elo gains and loses
