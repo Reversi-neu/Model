@@ -9,5 +9,5 @@ def eloCalculator(player_elo, enemy_elo, player_score, enemy_score):
         game_outcome = 1
     else:
         game_outcome = 0
-
+        
     return int(player_elo + (change * (game_outcome - expected_score)))
