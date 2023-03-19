@@ -30,10 +30,11 @@ class Reversi:
     def get_ai_move(self):
         #print(self.board.get_grid())
         self.check_win()
-        return self.ai.get_best_move(self.copy())
+        return self.ai.get_best_move(self.copy(self.board_size))
         #return self.possible_moves()[0]
     
     def make_move(self, move):
+        self.game_logic.get_size(self.board_size)
         gained_tiles = self.game_logic.make_move(self.board.get_grid(), move, self.cur_player.value)
 
         for tile in gained_tiles:
@@ -63,8 +64,8 @@ class Reversi:
         # array of moves [0, 0]
         return self.game_logic.possible_moves(self.board.get_grid(), self.cur_player.value)
 
-    def copy(self):
-        copied_game = Reversi(self.board_size, self.game_logic)
+    def copy(self, size):
+        copied_game = Reversi(size, self.game_logic)
         copied_game.board = Board(self.board_size, board=[row.copy() for row in self.board.get_grid()])
         copied_game.cur_player = self.cur_player
         copied_game.player1_score = self.player1_score

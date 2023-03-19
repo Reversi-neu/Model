@@ -16,8 +16,11 @@ $background_color: #282c34;
 .App {
   text-align: center;
   background-color: $background_color;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: scroll;
   font-family: 'Josefin Sans', sans-serif;
+}::-webkit-scrollbar {
+  display: none;
 }
 
 * {

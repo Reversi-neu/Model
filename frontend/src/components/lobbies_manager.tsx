@@ -58,10 +58,12 @@ export function LobbyManager() {
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
                                         width: '100%',
-                                        padding: '10px',
+                                        padding: '10px 20px',
                                         border: '1px solid black',
                                         borderRadius: '5px',
-                                        margin: '10px',
+                                        background: '#22262e',
+                                        // boxShadow: '0 0 1px #c4c4c4',
+                                        margin: '5px',
                                     }}
                                     key={game.id}
                                 >
@@ -88,6 +90,7 @@ export function LobbyManager() {
                     <div style={{
                         display: 'flex',
                         flexDirection: 'row',
+                        margin: '20px',
                     }}>
                         <button onClick={handleLobbyRefresh}>
                             Refresh

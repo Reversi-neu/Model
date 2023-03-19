@@ -72,7 +72,6 @@ default_elo = 1000
 games = []
 game_id_counter : int = getNextGameID()
 
-
 # -- routes
 @app.route('/login', methods=['POST'])
 def login():
