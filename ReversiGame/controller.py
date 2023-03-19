@@ -131,8 +131,23 @@ def makeMove():
     if (gameType == 'ai') or (gameType == 'local'):
         game = list(filter(lambda game: game['id'] == int(gameID), games))[0]
         game['game'].make_move([move["x"], move["y"]])
+
+        # this logic is not good, maybe...
         game['game'].change_cur_player()
-        # if (gameType == 'ai'): game['game'].make_move(game['game'].get_ai_move())
+        possibleMoves = game['game'].possible_moves()
+        if (len(possibleMoves) == 0):
+            game['game'].change_cur_player()
+        elif (gameType == 'ai'):
+            doesPlayer1HaveMoves = False
+            while not doesPlayer1HaveMoves:
+                game['game'].make_move(game['game'].get_ai_move())
+                game['game'].change_cur_player()
+                possibleMoves = game['game'].possible_moves()
+                if (len(possibleMoves) == 0):
+                    game['game'].change_cur_player()
+                else:
+                    doesPlayer1HaveMoves = True
+
         game['winner'] = game['game'].check_win()
         game['player1Score'] = game['game'].player1_score
         game['player2Score'] = game['game'].player2_score

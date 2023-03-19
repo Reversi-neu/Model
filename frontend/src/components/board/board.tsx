@@ -78,7 +78,7 @@ export class Board extends React.Component<Props, State> {
             winner: game.winner,
             playerTurn: game.playerTurn
         })
-        console.log(game, this.state)
+        console.log(game)
     }
 
     async makeMove(row: number, col: number) {
