@@ -1,16 +1,24 @@
 import "../App.scss"
 import { useToken } from "../hooks/use_token";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { GameType } from "./board/board";
-import { getGamesByType, getAIGamesByUserID } from "../services/game_service";
+import { getGamesByType, getAIGamesByUserID, createGame } from "../services/game_service";
 import React from "react";
+import Slider from '@mui/material/Slider';
+import { toast, ToastContainer } from "react-toastify";
 
 export function LobbyManager() {
     const { token } = useToken();
     const { gameType } = useParams<{gameType: string}>() as {gameType: GameType};
+    const [size, setSize] = React.useState<number>(8);
+    const [aiDifficulty, setAIDifficulty] = React.useState<number>(1);
     const [games, setGames] = React.useState<any[]>([]);
 
     React.useEffect(() => {
+        handleLobbyRefresh();
+    }, [gameType, token]);
+
+    const handleLobbyRefresh = async () => {
         if (gameType === 'ai') {
             getAIGamesByUserID(token).then((games) => {
                 console.log(games)
@@ -21,7 +29,21 @@ export function LobbyManager() {
                 setGames(games);
             });
         }
-    }, [gameType, token]);
+    }
+
+    const handleCreateGame = async () => {
+        if (gameType === 'ai') {
+            await createGame({
+                player1ID: token,
+                player2ID: 0,
+                gameType: gameType,
+                size: size,
+                difficulty: aiDifficulty,
+            });
+            handleLobbyRefresh();
+            toast.success('Game created!');
+        }
+    };
 
     return (
         <div className="App">
@@ -37,24 +59,28 @@ export function LobbyManager() {
                     {
                         games.map((game) => {
                             return (
-                                <div style={{
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    width: '100%',
-                                    padding: '10px',
-                                    border: '1px solid black',
-                                    borderRadius: '5px',
-                                    margin: '10px',
-                                }}>
-                                    <div>
-                                        <p>{ game.player1 }</p>
-                                        <p>{ game.player2 }</p>
-                                        <button>
-                                            Join
-                                        </button>
-                                    </div>
+                                <div 
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        width: '100%',
+                                        padding: '10px',
+                                        border: '1px solid black',
+                                        borderRadius: '5px',
+                                        margin: '10px',
+                                    }}
+                                    key={game.id}
+                                >
+                                    <p>
+                                        <u>{ game.player1.username }</u> <em>vs. </em> 
+                                        <u>{ game.player2.username + '-' + (game.difficulty > 0 && game.difficulty) }</u>
+                                    </p>
+                                    <p>{ game.size } x { game.size }</p>
+                                    <Link to={`/play/${game.type}/${game.id}`}>
+                                        Join
+                                    </Link>
                                 </div>
                             )
                         })
@@ -63,17 +89,81 @@ export function LobbyManager() {
                         display: 'flex',
                         flexDirection: 'row',
                     }}>
-                        <button>
-                            { gameType === 'local' || gameType === 'ai' ? 'Create ' : 'Search for '}
-                            Game
-                        </button>
-
-                        <button>
+                        <button onClick={handleLobbyRefresh}>
                             Refresh
                         </button>
                     </div>
                 </div>
+                
+                <div style={{
+                    margin: '20px',
+                    padding: '20px',
+                    display: 'flex',
+                    border: '1px solid #c4c4c4',
+                    boxShadow: '0 0 10px #c4c4c4',
+                    borderRadius: '15px',
+                }}>
+                    <span style={{
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems:'flex-start',
+                            margin: '0 20px'
+                        }}
+                    >
+                        <label style={{fontSize: '0.5em'}}>Size: {size}</label>
+                        <Slider
+                            aria-label="Size"
+                            defaultValue={8}
+                            value={size}
+                            step={2}
+                            marks
+                            min={4}
+                            max={32}
+                            onChange={(event, value) => {
+                                setSize(value as number);
+                            }}
+                            style={{
+                                width: 'fit-content',
+                                minWidth: '300px',
+                            }}
+                        />
+                    </span>
+
+                    {
+                        gameType === 'ai' &&
+                        <span style={{
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                alignItems:'flex-start',
+                                margin: '0 20px'
+                            }}
+                        >
+                            <label style={{fontSize: '0.5em'}}>Difficulty: {aiDifficulty}</label>
+                            <Slider
+                                aria-label="aiDifficulty"
+                                defaultValue={3}
+                                value={aiDifficulty}
+                                step={1}
+                                marks
+                                min={1}
+                                max={4}
+                                onChange={(event, value) => {
+                                    setAIDifficulty(value as number);
+                                }}
+                                style={{
+                                    width: 'fit-content',
+                                    minWidth: '200px',
+                                }}
+                            />
+                        </span>
+                    }
+                    
+                    <button onClick={handleCreateGame}>
+                        Create { gameType === 'local' || gameType === 'ai' ? 'Game' : 'Lobby'}
+                    </button>
+                </div>
             </div>
+            <ToastContainer theme="dark" />
         </div>
     );
 }

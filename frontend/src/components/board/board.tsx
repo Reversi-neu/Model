@@ -3,6 +3,7 @@ import './board.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { CompactPicker } from 'react-color';
+import { getGameByID, makeMove } from "../../services/game_service";
 
 interface State {
     id: number;
@@ -10,6 +11,8 @@ interface State {
     board: number[][];
     winner: number; // 0 = no winner, 1 = player 1, 2 = player 2
     playerTurn: number; // 1 = player 1, 2 = player 2
+    player1Score: number;
+    player2Score: number;
     player1Color: string;
     player2Color: string;
     boardColor1: string;
@@ -46,6 +49,8 @@ export class Board extends React.Component<Props, State> {
             board: this.exampleBoard,
             winner: 0,
             playerTurn: 1,
+            player1Score: 2,
+            player2Score: 2,
             // ui stuff
             player1Color: "#000000",
             player2Color: "#FFF",
@@ -54,7 +59,34 @@ export class Board extends React.Component<Props, State> {
             showSettings: false,
             rotateIcon: false
         }
-        console.log(this.state)
+    }
+
+    componentDidMount(): void {
+        // get game info
+        this.getGameInfo();
+    }
+
+    async getGameInfo() {
+        const game = await getGameByID(this.state.id);
+        this.setState({
+            board: game.board,
+        })
+    }
+
+    async makeMove(row: number, col: number) {
+        const res = await makeMove({
+            gameID: this.state.id, 
+            move: { x: col, y: row },
+            gameType: this.state.gameType
+        });
+        console.log(res)
+        if (res.board) {
+            this.getGameInfo();
+            this.setState({
+                player1Score: res.player1Score,
+                player2Score: res.player2Score,
+            })
+        }
     }
 
     render(): React.ReactNode {
@@ -62,6 +94,10 @@ export class Board extends React.Component<Props, State> {
             <div className="App">
                 <small>Type: {this.state.gameType.toLocaleUpperCase()}</small>
                 <div className="board">
+                    <p style={{
+                        fontSize: '2em',
+                        color: 'white'
+                    }}>{ this.state.player1Score } : { this.state.player2Score }</p>
                     <table>
                         <tbody>
                         {
@@ -71,10 +107,13 @@ export class Board extends React.Component<Props, State> {
                                         {
                                             row.map((col, j) => {
                                                 return (
-                                                    <td key={j} style={{
-                                                        backgroundColor: (i + j) % 2 === 0 ? this.state.boardColor1 : this.state.boardColor2,
-                                                        borderColor: (i + j) % 2 === 0 ? this.state.boardColor2 : this.state.boardColor1,
-                                                    }}>
+                                                    <td key={j} 
+                                                        style={{
+                                                            backgroundColor: (i + j) % 2 === 0 ? this.state.boardColor1 : this.state.boardColor2,
+                                                            borderColor: (i + j) % 2 === 0 ? this.state.boardColor2 : this.state.boardColor1,
+                                                        }}
+                                                        onClick={() => this.makeMove(i, j)}
+                                                    >
                                                         {
                                                             col === 0 ? <div className="empty"/> 
                                                             : 
