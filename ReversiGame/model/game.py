@@ -29,6 +29,7 @@ class Reversi:
 
     def get_ai_move(self):
         #print(self.board.get_grid())
+        self.check_win()
         return self.ai.get_best_move(self.copy())
         #return self.possible_moves()[0]
     
