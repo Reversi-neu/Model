@@ -30,16 +30,16 @@ interface Props {
 export class Board extends React.Component<Props, State> {
 
     // example board, 8x8 with 1s and 2s in the middle "4" squares, 0s everywhere else
-    exampleBoard = [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 2, 0, 0, 0],
-        [0, 0, 0, 2, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
-    ];
+    // exampleBoard = [
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [0, 0, 0, 1, 2, 0, 0, 0],
+    //     [0, 0, 0, 2, 1, 0, 0, 0],
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [0, 0, 0, 0, 0, 0, 0, 0],
+    //     [0, 0, 0, 0, 0, 0, 0, 0]
+    // ];
 
     constructor(props: Props) {
         super(props);
@@ -47,7 +47,7 @@ export class Board extends React.Component<Props, State> {
         this.state = {
             id: id,
             gameType: gameType,
-            board: this.exampleBoard,
+            board: [],
             winner: false,
             playerTurn: 1,
             player1Score: 2,

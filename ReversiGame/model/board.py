@@ -5,8 +5,9 @@ class Board:
         self.size = size
         self.board = board
 
-        for i in range(size):
-            self.board.append([0] * size)
+        if self.board == []:
+            for i in range(size):
+                self.board.append([0] * size)
 
     def __getitem__(self, coordinate):
         return self.board[coordinate[1]][coordinate[0]]

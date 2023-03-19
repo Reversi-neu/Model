@@ -1,5 +1,3 @@
-from model.game import Reversi
-
 class ReversiAI:
     def __init__(self, depth):
         self.depth = depth
@@ -14,6 +12,8 @@ class ReversiAI:
 
         print(possible_moves)
         print(game.board.get_grid())
+        print(game.player1_score)
+        print(game.player2_score)
 
     def minimax(self, game, depth, maximizing):
         pass
