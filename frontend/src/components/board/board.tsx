@@ -4,6 +4,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { CompactPicker } from 'react-color';
 import { getGameByID, makeMove } from "../../services/game_service";
+import Modal from '@mui/material/Modal';
+import { Link, useNavigate } from "react-router-dom";
+import { Box, Typography } from "@mui/material";
 
 interface State {
     id: number;
@@ -76,7 +79,7 @@ export class Board extends React.Component<Props, State> {
             player2Score: game.player2Score,
             possibleMoves: game.possibleMoves,
             winner: game.winner,
-            playerTurn: game.playerTurn
+            playerTurn: game.currentPlayer
         })
         console.log(game)
     }
@@ -89,10 +92,6 @@ export class Board extends React.Component<Props, State> {
         });
         if (res) {
             this.getGameInfo();
-            // this.setState({
-            //     player1Score: res.player1Score,
-            //     player2Score: res.player2Score,
-            // })
         }
     }
 
@@ -119,7 +118,8 @@ export class Board extends React.Component<Props, State> {
                         fontSize: '2em',
                         color: 'white'
                     }}>
-                        { this.state.player1Score } : { this.state.player2Score }
+                        { this.state.player1Score } : { this.state.player2Score } <br/>
+                        - Player { this.state.playerTurn } Turn -
                     </p>
                     <table>
                         <tbody>
@@ -181,10 +181,54 @@ export class Board extends React.Component<Props, State> {
                         }
                         </tbody>
                     </table>
+                    { this.renderWinnerModal() }
                     { this.renderSettings() }
                 </div>
             </div>
         );
+    }
+
+    renderWinnerModal(): React.ReactNode {
+        const style = {
+            position: 'absolute' as 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: '#282c34',
+            color: 'white',
+            border: '2px solid #000',
+            font: '',
+            boxShadow: 24,
+            p: 4,
+        };
+        return (
+            this.state.winner &&
+            <div>
+                <Modal
+                    open={this.state.winner}
+                    onClose={() => {
+
+                    }}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
+                    <Box sx={style}>
+                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                            { 
+                                this.state.player1Score == this.state.player2Score ? 
+                                "Tie!" :
+                                this.state.player1Score > this.state.player2Score ?
+                                "Player 1 Wins!" : "Player 2 Wins!" 
+                            }
+                        </Typography>
+                        <Link to={'/play/' + (this.state.gameType)}>
+                            Back to lobby
+                        </Link>
+                    </Box>
+                </Modal>
+            </div>
+        )
     }
 
     renderSettings(): React.ReactNode {

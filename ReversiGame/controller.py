@@ -138,10 +138,12 @@ def makeMove():
                     game['game'].change_cur_player()
                 else:
                     break
-
+        
         game['winner'] = game['game'].check_win()
         if (game['winner']):
-            postgame(gameID)
+            postgame(int(gameID))
+            #set game inactive
+            game["active"] = False
 
         game['player1Score'] = game['game'].player1_score
         game['player2Score'] = game['game'].player2_score
@@ -162,8 +164,7 @@ def createGame():
     size = requestBody['size']
     gameType = requestBody['gameType']
     difficulty = requestBody['difficulty'] or 0
-    newId = copy.copy(game_id_counter)
-    game_id_counter = game_id_counter + 1
+    newId = getNextGameID()
     # date = datetime.datetime.now()
 
     if (gameType == 'ai') or (gameType == 'local'):
@@ -176,6 +177,7 @@ def createGame():
             "player1": getUserByID(player1ID), "player2": getUserByID(player2ID), 
             "winner": None, "player1Score": 2, "player2Score": 2, 
             "currentPlayer": 1, "possibleMoves": reversiBoard.possible_moves(),
+            "active": True
         }
         games.append(game)
         
@@ -187,12 +189,13 @@ def createGame():
         pass
 
 def postgame(gameID):
-    game = list(filter(lambda game: game['id'] == int(gameID), games))[0]
+    game = list(filter(lambda game: game['id'] == gameID, games))[0]
     print(game)
     player1ID = game['player1']['userID']
     player2ID = game['player2']['userID']
     player1Score = game['player1Score']
     player2Score = game['player2Score']
+    difficulty = game['difficulty']
     finishTime = datetime.datetime.now()
     
     if game['player1Score'] > game['player2Score']:
@@ -208,30 +211,51 @@ def postgame(gameID):
     data = (gameID, player1ID, player2ID, winnerID, player1Score, player2Score, finishTime)
     callDB(statement, data)
 
+    gameType = game['type']
+    if gameType == 'online':
+        ##update elo
+        #eloCalculator(player_elo, enemy_elo, player_score, enemy_score)
 
-    ##update elo
-    #eloCalculator(player_elo, enemy_elo, player_score, enemy_score)
+        statement = 'SELECT elo FROM elo WHERE userID = %s'
+        player1Old = callDB(statement, (player1ID))[0][0]
+        statement = 'SELECT elo FROM elo WHERE us, mmkl,erID = %s'
+        player2Old = callDB(statement, (player2ID))[0][0]
 
-    statement = 'SELECT elo FROM elo WHERE userID = %s'
-    player1Old = callDB(statement, (player1ID))
-    statement = 'SELECT elo FROM elo WHERE userID = %s'
-    player2Old = callDB(statement, (player2ID))
+        #player1
+        player1New = eloCalculator(player1Old, player2Old, player1Score, player2Score)
+        statement = 'UPDATE elo SET elo = %s, lastUpdate=%s WHERE userID = %s'
+        data = (player1New, finishTime, player1ID)
+        callDB(statement, data)
 
-    #player1
-    player1New = eloCalculator(player1Old, player2Old, player1Score, player2Score)
-    statement = 'UPDATE elo SET elo = %s, lastUpdate=%s WHERE userID = %s'
-    data = (player1New, finishTime, player1ID)
-    callDB(statement, data)
+        #player2
+        player2New = eloCalculator(player2Old, player1Old, player2Score, player1Score)
+        statement = 'UPDATE elo SET elo = %s, lastUpdate=%s WHERE userID = %s'
+        data = (player2New, finishTime, player2ID)
+        callDB(statement, data)
 
-    #player2
-    player2New = eloCalculator(player2Old, player1Old, player2Score, player1Score)
-    statement = 'UPDATE elo SET elo = %s, lastUpdate=%s WHERE userID = %s'
-    data = (player2New, finishTime, player2ID)
-    callDB(statement, data)
+    elif gameType == 'ai':
+        
+        statement = 'SELECT elo FROM elo WHERE userID = %s'
+        player1Old = callDB(statement, (player1ID))[0][0]
+        statement = 'SELECT elo FROM elo WHERE userID = %s'
+        if difficulty == 1: aiID = -1
+        if difficulty == 2: aiID = -2
+        if difficulty == 3: aiID = -3
+        if difficulty == 4: aiID = -4
+        player2Old = callDB(statement, (aiID))[0][0]
 
-    #remove game from dictionary 
-    game.pop(gameID)
-    return 
+        #player1
+        player1New = eloCalculator(player1Old, player2Old, player1Score, player2Score)
+        statement = 'UPDATE elo SET elo = %s, lastUpdate=%s WHERE userID = %s'
+        data = (player1New, finishTime, player1ID)
+        callDB(statement, data)
+
+        #player2
+        player2New = eloCalculator(player2Old, player1Old, player2Score, player1Score)
+        statement = 'UPDATE elo SET elo = %s, lastUpdate=%s WHERE userID = %s'
+        data = (player2New, finishTime, aiID)
+        callDB(statement, data)
+
 # helpers / future routes
 
 def callDB(statement, data):
@@ -264,6 +288,13 @@ def getUserByID(userID):
 
 def getNextUserID():
     rv = callDB('SELECT MAX(userID) FROM users', ())
+
+    if (len(rv) == 0):
+        return 1
+
+    return rv[0][0] + 1
+def getNextGameID():
+    rv = callDB('SELECT MAX(gameID) FROM games', ())
 
     if (len(rv) == 0):
         return 1
