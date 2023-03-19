@@ -31,11 +31,7 @@ def login():
     username = requestBody['username']
     password = requestBody['password']
 
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
-    rv = cursor.fetchall()
-    conn.commit()
-    cursor.close()
+    rv = callDB('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
 
     if (len(rv) == 0):
         return jsonify({
@@ -58,14 +54,9 @@ def signup():
     newId = getNextUserID()
     date = datetime.datetime.now()
 
-    cursor = conn.cursor()
-    cursor.execute('INSERT INTO users VALUES (%s, %s, %s, %s)', (newId, username, password, date))
-    cursor.execute('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
-    # need this stupid select call for the fetch to return something
-    cursor.execute('SELECT * FROM users WHERE userID = %s', (newId))
-    rv = cursor.fetchall()
-    conn.commit()
-    cursor.close()
+    callDB('INSERT INTO users VALUES (%s, %s, %s, %s)', (newId, username, password, date))
+    callDB('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
+    rv = callDB('SELECT * FROM users WHERE userID = %s', (newId))
 
     if (len(rv) == 0):
         return jsonify({
@@ -85,16 +76,9 @@ def guest():
     newId = getNextUserID()
     date = datetime.datetime.now()
 
-    statement = 'INSERT INTO users VALUES (%s, %s, %s, %s) INSERT INTO elo VALUES (%s, %s, %s)'
-    data = (newId, None, None, date)
-    rv = callDB(statement, data)
-
-    # cursor.execute('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
-    # # need this stupid select call for the fetch to return something
-    # cursor.execute('SELECT * FROM users WHERE userID = %s', (newId))
-    # rv = cursor.fetchall()
-    # conn.commit()
-    # cursor.close()
+    callDB('INSERT INTO users VALUES (%s, %s, %s, %s)', (newId, None, None, date))
+    callDB('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
+    rv = callDB('SELECT * FROM users WHERE userID = %s', (newId))
 
     if (len(rv) == 0):
         return jsonify({
@@ -221,7 +205,29 @@ def postgame(gameID):
     
     statement = 'INSERT INTO games VALUES (%s, %s, %s, %s, %s, %s, %s)'
     data = (gameID, player1ID, player2ID, winnerID, player1Score, player2Score, finishTime)
-    rv = callDB(statement, data)
+    callDB(statement, data)
+
+
+    ##update elo
+    #eloCalculator(player_elo, enemy_elo, player_score, enemy_score)
+
+    statement = 'SELECT elo FROM elo WHERE userID = %s'
+    player1Old = callDB(statement, (player1ID))
+    statement = 'SELECT elo FROM elo WHERE userID = %s'
+    player2Old = callDB(statement, (player2ID))
+
+    #player1
+    player1New = eloCalculator(player1Old, player2Old, player1Score, player2Score)
+    statement = 'UPDATE elo SET elo = %s, lastUpdate=%s WHERE userID = %s'
+    data = (player1New, finishTime, player1ID)
+    callDB(statement, data)
+
+    #player2
+    player2New = eloCalculator(player2Old, player1Old, player2Score, player1Score)
+    statement = 'UPDATE elo SET elo = %s, lastUpdate=%s WHERE userID = %s'
+    data = (player2New, finishTime, player2ID)
+    callDB(statement, data)
+
 
     return 
 # helpers / future routes

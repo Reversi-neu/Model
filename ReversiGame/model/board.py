@@ -1,9 +1,9 @@
 from model.player import Player
 
 class Board:
-    def __init__(self, size, grid=[]):
+    def __init__(self, size, board=[]):
         self.size = size
-        self.board = []
+        self.board = board
 
         for i in range(size):
             self.board.append([0] * size)
@@ -16,9 +16,3 @@ class Board:
 
     def get_grid(self):
         return self.board
-
-    def copy(self):
-        new_board = Board(self.size)
-        new_board.board = self.board
-        
-        return new_board
