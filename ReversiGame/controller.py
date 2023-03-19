@@ -55,12 +55,14 @@ def signup():
     requestBody = request.json
     username = requestBody['username']
     password = requestBody['password']
-    newId = uuid.uuid1().int
+    newId = getNextUserID()
     date = datetime.datetime.now()
 
     cursor = conn.cursor()
     cursor.execute('INSERT INTO users VALUES (%s, %s, %s, %s)', (newId, username, password, date))
     cursor.execute('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
+    # need this stupid select call for the fetch to return something
+    cursor.execute('SELECT * FROM users WHERE userID = %s', (newId))
     rv = cursor.fetchall()
     conn.commit()
     cursor.close()
@@ -80,12 +82,14 @@ def signup():
 
 @app.route('/guest', methods=['PUT'])
 def guest():
-    newId = uuid.uuid1().int
+    newId = getNextUserID()
     date = datetime.datetime.now()
 
     cursor = conn.cursor()
     cursor.execute('INSERT INTO users VALUES (%s, %s, %s, %s)', (newId, None, None, date))
     cursor.execute('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
+    # need this stupid select call for the fetch to return something
+    cursor.execute('SELECT * FROM users WHERE userID = %s', (newId))
     rv = cursor.fetchall()
     conn.commit()
     cursor.close()
@@ -132,21 +136,20 @@ def makeMove():
         game = list(filter(lambda game: game['id'] == int(gameID), games))[0]
         game['game'].make_move([move["x"], move["y"]])
 
-        # this logic is not good, maybe...
+        # this logic is not good, maybe... either the bot is goated and i suck, or its cheating and i cant tell
         game['game'].change_cur_player()
         possibleMoves = game['game'].possible_moves()
         if (len(possibleMoves) == 0):
             game['game'].change_cur_player()
         elif (gameType == 'ai'):
-            doesPlayer1HaveMoves = False
-            while not doesPlayer1HaveMoves:
+            while True:
                 game['game'].make_move(game['game'].get_ai_move())
                 game['game'].change_cur_player()
                 possibleMoves = game['game'].possible_moves()
                 if (len(possibleMoves) == 0):
                     game['game'].change_cur_player()
                 else:
-                    doesPlayer1HaveMoves = True
+                    break
 
         game['winner'] = game['game'].check_win()
         game['player1Score'] = game['game'].player1_score
@@ -192,7 +195,8 @@ def createGame():
     elif (gameType == 'online'):
         pass
 
-# helper / future route
+# helpers / future routes
+
 def getUserByID(userID):
     if (userID == 0): # AI
         return {
@@ -215,5 +219,17 @@ def getUserByID(userID):
         'username': rv[0][1],
         'password': rv[0][2],
     }
+
+def getNextUserID():
+    cursor = conn.cursor()
+    cursor.execute('SELECT MAX(userID) FROM users')
+    rv = cursor.fetchall()
+    conn.commit()
+    cursor.close()
+
+    if (len(rv) == 0):
+        return 1
+
+    return rv[0][0] + 1
 
 app.run()

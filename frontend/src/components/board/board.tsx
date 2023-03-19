@@ -84,7 +84,7 @@ export class Board extends React.Component<Props, State> {
     async makeMove(row: number, col: number) {
         const res = await makeMove({
             gameID: this.state.id, 
-            move: { x: col, y: row },
+            move: { x: row, y: col },
             gameType: this.state.gameType
         });
         if (res) {
@@ -146,7 +146,7 @@ export class Board extends React.Component<Props, State> {
                                                                             backgroundColor: this.state.player1Color,
                                                                             opacity: 0.3
                                                                         }}
-                                                                        onClick={() => this.makeMove(i, j)}
+                                                                        onClick={() => this.makeMove(j, i)}
                                                                     /> 
                                                                     : 
                                                                     <div 
@@ -155,7 +155,7 @@ export class Board extends React.Component<Props, State> {
                                                                             backgroundColor: this.state.player2Color,
                                                                             opacity: 0.3
                                                                         }}
-                                                                        onClick={() => this.makeMove(i, j)}
+                                                                        onClick={() => this.makeMove(j, i)}
                                                                     />
                                                                 : <div className="empty"/>
                                                             : 

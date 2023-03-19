@@ -73,6 +73,7 @@ class ReversiAI:
 
     def possible_moves(self, board, player):
         game_logic = ClassicMode()
+        game_logic.get_size(len(board))
         moves = []
 
         for i in range(len(board)):

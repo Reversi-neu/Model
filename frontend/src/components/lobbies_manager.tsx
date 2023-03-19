@@ -68,7 +68,7 @@ export function LobbyManager() {
                                     {
                                         (gameType === 'ai' || gameType === 'local') &&
                                         <p>
-                                            <u>{ game.player1.username }</u> <em>vs. </em> 
+                                            <u>{ game.player1.username || ('Guest' + game.player1.userID) }</u> <em>vs. </em> 
                                             {
                                                 gameType === 'ai' ?
                                                 <u>{ 'AI-' + (game.difficulty > 0 && game.difficulty) }</u>

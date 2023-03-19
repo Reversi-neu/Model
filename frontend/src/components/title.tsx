@@ -15,10 +15,11 @@ export function Title() {
 
     const handleGuestLogin = async () => {
         const token = await signupGuest();
+        console.log(token)
         setToken(token.userID);
 
         // redirect to home
-        window.location.href = "/";
+        // window.location.href = "/";
     }
 
     return (
