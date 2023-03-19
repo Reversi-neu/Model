@@ -85,14 +85,16 @@ def guest():
     newId = getNextUserID()
     date = datetime.datetime.now()
 
-    cursor = conn.cursor()
-    cursor.execute('INSERT INTO users VALUES (%s, %s, %s, %s)', (newId, None, None, date))
-    cursor.execute('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
-    # need this stupid select call for the fetch to return something
-    cursor.execute('SELECT * FROM users WHERE userID = %s', (newId))
-    rv = cursor.fetchall()
-    conn.commit()
-    cursor.close()
+    statement = 'INSERT INTO users VALUES (%s, %s, %s, %s) INSERT INTO elo VALUES (%s, %s, %s)'
+    data = (newId, None, None, date)
+    rv = callDB(statement, data)
+
+    # cursor.execute('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
+    # # need this stupid select call for the fetch to return something
+    # cursor.execute('SELECT * FROM users WHERE userID = %s', (newId))
+    # rv = cursor.fetchall()
+    # conn.commit()
+    # cursor.close()
 
     if (len(rv) == 0):
         return jsonify({
@@ -153,6 +155,9 @@ def makeMove():
                     break
 
         game['winner'] = game['game'].check_win()
+        if (game['winner']):
+            postgame(gameID)
+
         game['player1Score'] = game['game'].player1_score
         game['player2Score'] = game['game'].player2_score
         game['board'] = game['game'].board.get_grid()
@@ -196,7 +201,38 @@ def createGame():
     elif (gameType == 'online'):
         pass
 
+def postgame(gameID):
+    game = list(filter(lambda game: game['id'] == int(gameID), games))[0]
+    print(game)
+    player1ID = game['player1']['userID']
+    player2ID = game['player2']['userID']
+    player1Score = game['player1Score']
+    player2Score = game['player2Score']
+    finishTime = datetime.datetime.now()
+    
+    if game['player1Score'] > game['player2Score']:
+        winnerID = player1ID
+    elif game['player1Score'] < game['player2Score']:
+        winnerID = player2ID
+    # elif game['player1Score'].userID == game['player2Score'].userID:
+    #     winnerID = None
+    else: 
+        winnerID = None
+    
+    statement = 'INSERT INTO games VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    data = (gameID, player1ID, player2ID, winnerID, player1Score, player2Score, finishTime)
+    rv = callDB(statement, data)
+
+    return 
 # helpers / future routes
+
+def callDB(statement, data):
+    cursor = conn.cursor()
+    cursor.execute(statement, data)
+    rv = cursor.fetchall()
+    conn.commit()
+    cursor.close()
+    return rv
 
 def getUserByID(userID):
     if (userID == 0): # AI
@@ -206,11 +242,8 @@ def getUserByID(userID):
             'password': None,
         }
 
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE userID = %s', (userID))
-    rv = cursor.fetchall()
-    conn.commit()
-    cursor.close()
+    statement = 'SELECT * FROM users WHERE userID = %s'
+    rv = callDB(statement, (userID))
 
     if (len(rv) == 0):
         return None
@@ -222,11 +255,7 @@ def getUserByID(userID):
     }
 
 def getNextUserID():
-    cursor = conn.cursor()
-    cursor.execute('SELECT MAX(userID) FROM users')
-    rv = cursor.fetchall()
-    conn.commit()
-    cursor.close()
+    rv = callDB('SELECT MAX(userID) FROM users', ())
 
     if (len(rv) == 0):
         return 1
