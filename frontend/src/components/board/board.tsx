@@ -108,7 +108,7 @@ export class Board extends React.Component<Props, State> {
                                 color: 'white'
                             }}>
                                 { 
-                                    this.state.player1Score == this.state.player2Score ? 
+                                    this.state.player1Score === this.state.player2Score ? 
                                     "Tie!" :
                                     this.state.player1Score > this.state.player2Score ?
                                     "Player 1 Wins!" : "Player 2 Wins!" 
