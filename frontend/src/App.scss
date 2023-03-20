@@ -66,6 +66,26 @@ button {
   }
 }
 
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  font-size: calc(3rem);
+  color: white;
+  padding: 20px 0;
+
+  label {
+    font-size: 0.5em;
+    color: black;
+    border-bottom: 1px solid white;
+  }
+
+  p {
+    margin: 10px 0;
+  }
+}
+
 .App-link {
   color: #61dafb;
 }

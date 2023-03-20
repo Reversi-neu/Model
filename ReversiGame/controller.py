@@ -17,25 +17,7 @@ CORS(app)
 
 db = DB()
 
-def getUserByID(userID):
-    if (userID == 0): # AI
-        return {
-            'userID': 0,
-            'username': None,
-            'password': None,
-        }
-
-    statement = 'SELECT * FROM users WHERE userID = %s'
-    rv = db.callDB(statement, (userID))
-
-    if (len(rv) == 0):
-        return None
-
-    return {
-        'userID': rv[0][0],
-        'username': rv[0][1],
-        'password': rv[0][2],
-    }
+# -- helpers / future routes
 
 def getNextUserID():
     rv = db.callDB('SELECT MAX(userID) FROM users', ())
@@ -59,6 +41,28 @@ games = []
 game_id_counter : int = getNextGameID()
 
 # -- routes
+@app.route('/user/<userID>', methods=['GET'])
+def getUserByID(userID):
+    userID = int(userID)
+    if (userID == 0): # AI
+        return {
+            'userID': 0,
+            'username': None,
+            'password': None,
+        }
+
+    statement = 'SELECT * FROM users WHERE userID = %s'
+    rv = db.callDB(statement, (userID))
+
+    if (len(rv) == 0):
+        return None
+
+    return {
+        'userID': rv[0][0],
+        'username': rv[0][1],
+        'password': rv[0][2],
+    }
+
 @app.route('/login', methods=['POST'])
 def login():
     requestBody = request.json

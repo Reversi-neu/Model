@@ -1,5 +1,14 @@
 import { useToken } from "../hooks/use_token";
 
+export async function getUserByID(userID: number) {
+    return fetch(process.env.REACT_APP_API_URL! + '/user/' + userID, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(data => data.json())
+}
+
 export async function loginUser(credentials: {username: string, password: string}) {
     return fetch(process.env.REACT_APP_API_URL!+'/login', {
         method: 'POST',

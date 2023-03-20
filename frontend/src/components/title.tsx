@@ -19,7 +19,7 @@ export function Title() {
         setToken(token.userID);
 
         // redirect to home
-        // window.location.href = "/";
+        window.location.href = "/";
     }
 
     return (
