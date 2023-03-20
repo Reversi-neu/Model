@@ -42,7 +42,7 @@ export function Sidebar() {
                 }}
             >
                 { token && 
-                    <Link to="settings" className="icon">
+                    <Link to="settings" className="icon" style={{marginTop: '5px'}}>
                         <FontAwesomeIcon icon={faUser} />
                     </Link>
                 }
