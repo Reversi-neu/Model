@@ -104,15 +104,15 @@ export function LobbyManager() {
                 </div>
                 
                 <div style={{
+                    display: gameType === 'online' ? 'none' : 'flex',
                     margin: '20px',
                     padding: '20px',
-                    display: 'flex',
                     justifyContent: 'center',
                     border: '1px solid #c4c4c4',
                     boxShadow: '0 0 5px #c4c4c4',
                     borderRadius: '15px',
                     width: '100%',
-                    background: '#22262e'
+                    background: '#22262e',
                 }}>
                     <span style={{
                             display: 'flex', 

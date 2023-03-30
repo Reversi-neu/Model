@@ -163,7 +163,7 @@ export class Board extends React.Component<Props, State> {
                                                         }}
                                                     >
                                                         {
-                                                            col === 0 && this.state.myTurn ? 
+                                                            col === 0 && ((this.state.gameType === 'online' && this.state.myTurn) || this.state.gameType !== 'online') ? 
                                                             this.state.possibleMoves.some(move => move[0] === j && move[1] === i) ? 
                                                                     this.state.playerTurn !== 1 ? 
                                                                     <div 

@@ -41,6 +41,7 @@ def getNextGameID():
 default_elo = 1000
 games = []
 game_id_counter : int = getNextGameID()
+players_searching = []
 
 # -- routes
 @app.route('/user/<userID>', methods=['GET'])
@@ -161,7 +162,7 @@ def moveRoute():
     return makeMove(gameType, gameID, move)
 
 @app.route("/games", methods=['PUT'])# do we create games with one player and put them on a lobby for others to join, or do we create the games with the two usernames
-def createGame():
+def createGameRoute():
     global game_id_counter
     requestBody = request.json
     player1ID = requestBody['player1ID']
@@ -173,6 +174,10 @@ def createGame():
     game_id_counter += 1
     # date = datetime.datetime.now()
 
+    return createGame(player1ID, player2ID, size, gameType, difficulty, newId)
+
+# ---- more helpers -----
+def createGame(player1ID, player2ID, size, gameType, difficulty, newId):
     reversiBoard = Reversi(size, ai_depth = difficulty) if gameType == 'ai' else Reversi(size, ai_depth=0)
 
     # this is basically where we define what our 'games' dicts are gonna look like (THIS IS ALL THE STUFF I WANT FOR THE FRONT END, IT GOTTA BE UPDATED W/ THE GAME)
@@ -320,22 +325,47 @@ def eloCalculator(player_elo, enemy_elo, player_score, enemy_score):
 @socketio.on("connect")
 def connected():
     """event listener when client connects to the server"""
-    print(request.sid)
-    print("client has connected")
+
+    print("client has connected: ", request.sid)
     emit("connect",{"data":f"id: {request.sid} is connected"})
 
 @socketio.on('makeMove')
 def handleSocketMove(data):
-    """event listener when client types a message"""
-    # print("data from the front end: ",jsonify(data), data)
+    """event listener when client makes a move"""
 
-    gameData = makeMove(data['gameType'],data["gameID"],data["move"])
-
+    # only gotta make move here and not return shit, bc the frontend will get game info on socket 'makeMove'
+    makeMove(data['gameType'],data["gameID"],data["move"])
     emit("makeMove",{},broadcast=True)
+
+@socketio.on('searchForLobby')
+def searchForLobby(data):
+    """event listener when client searches for game lobby"""
+
+    players_searching.append(data)
+    print(players_searching)
+    for player1 in players_searching:
+        for player2 in players_searching:
+            res = (player1['id'] != player2['id'] and player1['size'] == player2['size'])
+            if res:
+                global game_id_counter
+                gameDict = createGame(player1['id'], player2['id'], player1['size'], 'online', 0, game_id_counter)
+                game_id_counter += 1
+
+                emit("lobbyFound",gameDict.get_json(),broadcast=True)
+                break
+
+@socketio.on('cancelLobbySearch')
+def cancelLobbySearch(data):
+    """event listener when client searches for game lobby"""
+
+    print('canceling', data)
+    global players_searching
+    players_searching = list(filter(lambda player: player['id'] == data['id'], players_searching))
 
 @socketio.on("disconnect")
 def disconnected():
     """event listener when client disconnects to the server"""
+
     print("user disconnected")
     emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
 
