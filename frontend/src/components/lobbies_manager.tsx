@@ -28,7 +28,7 @@ export function LobbyManager() {
     const handleCreateGame = async () => {
         await createGame({
             player1ID: token,
-            player2ID: 0,
+            player2ID: 9,
             gameType: gameType,
             size: size,
             difficulty: aiDifficulty,
@@ -68,7 +68,7 @@ export function LobbyManager() {
                                     key={game.id}
                                 >
                                     {
-                                        (gameType === 'ai' || gameType === 'local') &&
+                                        (gameType === 'ai' || gameType === 'local') ?
                                         <p>
                                             <u>{ game.player1.username || ('Guest' + game.player1.userID) }</u> <em>vs. </em> 
                                             {
@@ -77,6 +77,11 @@ export function LobbyManager() {
                                                 :
                                                 <u>LOCAL</u>
                                             }
+                                        </p>
+                                        :
+                                        <p>
+                                            <u>{ game.player1.username || ('Guest' + game.player1.userID) }</u> <em>vs. </em>
+                                            <u>{ game.player2.username || ('Guest' + game.player2.userID) }</u>
                                         </p>
                                     }
                                     <p>{ game.size } x { game.size }</p>

@@ -152,47 +152,13 @@ def getGameByID(gameID):
     return jsonify(game)
 
 @app.route('/games', methods=['POST'])
-def makeMove():
+def moveRoute():
     requestBody = request.json
     gameType = requestBody['gameType']
     gameID = requestBody['gameID']
     move = requestBody['move']
 
-    if (gameType == 'ai') or (gameType == 'local'):
-        game = list(filter(lambda game: game['id'] == int(gameID), games))[0]
-        game['game'].make_move([move["x"], move["y"]])
-
-        # this logic is not good, maybe... either the bot is goated and i suck, or its cheating and i cant tell
-        game['game'].change_cur_player()
-        possibleMoves = game['game'].possible_moves()
-        if (len(possibleMoves) == 0):
-            game['game'].change_cur_player()
-        elif (gameType == 'ai'):
-            while True:
-                game['game'].make_move(game['game'].get_ai_move())
-                game['game'].change_cur_player()
-                possibleMoves = game['game'].possible_moves()
-                if game['game'].check_win(): break
-                if (len(possibleMoves) == 0):
-                    game['game'].change_cur_player()
-                else:
-                    break
-        
-        game['winner'] = game['game'].check_win()
-        if (game['winner']):
-            postgame(int(gameID))
-            #set game inactive
-            game["active"] = False
-
-        game['player1Score'] = game['game'].player1_score
-        game['player2Score'] = game['game'].player2_score
-        game['board'] = game['game'].board.get_grid()
-        game['currentPlayer'] = game['game'].cur_player
-        game['possibleMoves'] = game['game'].possible_moves()
-
-        game_copy = copy.deepcopy(game)
-        game_copy.pop('game')
-        return jsonify(game_copy)
+    return makeMove(gameType, gameID, move)
 
 @app.route("/games", methods=['PUT'])# do we create games with one player and put them on a lobby for others to join, or do we create the games with the two usernames
 def createGame():
@@ -207,26 +173,66 @@ def createGame():
     game_id_counter += 1
     # date = datetime.datetime.now()
 
-    if (gameType == 'ai') or (gameType == 'local'):
-        reversiBoard = Reversi(size, ai_depth = difficulty) if gameType == 'ai' else Reversi(size, ai_depth=0)
+    reversiBoard = Reversi(size, ai_depth = difficulty) if gameType == 'ai' else Reversi(size, ai_depth=0)
 
-        # this is basically where we define what our 'games' dicts are gonna look like (THIS IS ALL THE STUFF I WANT FOR THE FRONT END, IT GOTTA BE UPDATED W/ THE GAME)
-        game = {
-            "id": newId, "game": reversiBoard, "board": reversiBoard.board.get_grid(),
-            "type": gameType, "size": size, "difficulty": difficulty,
-            "player1": getUserByID(player1ID), "player2": getUserByID(player2ID), 
-            "winner": None, "player1Score": 2, "player2Score": 2, 
-            "currentPlayer": 1, "possibleMoves": reversiBoard.possible_moves(),
-            "active": True
-        }
-        games.append(game)
-        
-        g_copy = copy.deepcopy(game)
-        g_copy.pop('game')
-        return jsonify(g_copy)
+    # this is basically where we define what our 'games' dicts are gonna look like (THIS IS ALL THE STUFF I WANT FOR THE FRONT END, IT GOTTA BE UPDATED W/ THE GAME)
+    game = {
+        "id": newId, 
+        "game": reversiBoard, 
+        "board": reversiBoard.board.get_grid(),
+        "type": gameType, 
+        "size": size, 
+        "difficulty": difficulty,
+        "player1": getUserByID(player1ID), 
+        "player2": getUserByID(player2ID), 
+        "winner": None, 
+        "player1Score": 2, 
+        "player2Score": 2, 
+        "currentPlayer": 1, 
+        "possibleMoves": reversiBoard.possible_moves(),
+        "active": True
+    }
+    games.append(game)
+    
+    g_copy = copy.deepcopy(game)
+    g_copy.pop('game')
+    return jsonify(g_copy)
 
-    elif (gameType == 'online'):
-        pass
+def makeMove(gameType, gameID, move):
+    game = list(filter(lambda game: game['id'] == int(gameID), games))[0]
+    game['game'].make_move([move["x"], move["y"]])
+
+    # this logic is not good, maybe... either the bot is goated and i suck, or its cheating and i cant tell
+    game['game'].change_cur_player()
+    possibleMoves = game['game'].possible_moves()
+    if (len(possibleMoves) == 0):
+        game['game'].change_cur_player()
+    elif (gameType == 'ai'):
+        while True:
+            game['game'].make_move(game['game'].get_ai_move())
+            game['game'].change_cur_player()
+            possibleMoves = game['game'].possible_moves()
+            if game['game'].check_win(): break
+            if (len(possibleMoves) == 0):
+                game['game'].change_cur_player()
+            else:
+                break
+    
+    game['winner'] = game['game'].check_win()
+    if (game['winner']):
+        postgame(int(gameID))
+        #set game inactive
+        game["active"] = False
+
+    game['player1Score'] = game['game'].player1_score
+    game['player2Score'] = game['game'].player2_score
+    game['board'] = game['game'].board.get_grid()
+    game['currentPlayer'] = game['game'].cur_player
+    game['possibleMoves'] = game['game'].possible_moves()
+
+    game_copy = copy.deepcopy(game)
+    game_copy.pop('game')
+    return jsonify(game_copy)
 
 def postgame(gameID):
     game = list(filter(lambda game: game['id'] == gameID, games))[0]
@@ -318,11 +324,14 @@ def connected():
     print("client has connected")
     emit("connect",{"data":f"id: {request.sid} is connected"})
 
-@socketio.on('json')
-def handle_message(data):
+@socketio.on('makeMove')
+def handleSocketMove(data):
     """event listener when client types a message"""
-    print("data from the front end: ",jsonify(data))
-    emit("data",{'data':data,'id':request.sid},broadcast=True)
+    # print("data from the front end: ",jsonify(data), data)
+
+    gameData = makeMove(data['gameType'],data["gameID"],data["move"])
+
+    emit("makeMove",{},broadcast=True)
 
 @socketio.on("disconnect")
 def disconnected():

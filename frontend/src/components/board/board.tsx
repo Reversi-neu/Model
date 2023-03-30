@@ -5,8 +5,9 @@ import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { CompactPicker } from 'react-color';
 import { getGameByID, makeMove } from "../../services/game_service";
 import Modal from '@mui/material/Modal';
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
+import { socket } from '../../services/socket';
 
 interface State {
     id: number;
@@ -14,6 +15,7 @@ interface State {
     board: number[][];
     winner: boolean; // 0 = no winner, 1 = player 1, 2 = player 2
     playerTurn: number; // 1 = player 1, 2 = player 2
+    myTurn: boolean;
     player1Score: number;
     player2Score: number;
     possibleMoves: Number[][];
@@ -31,19 +33,6 @@ interface Props {
 }
 
 export class Board extends React.Component<Props, State> {
-
-    // example board, 8x8 with 1s and 2s in the middle "4" squares, 0s everywhere else
-    // exampleBoard = [
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [0, 0, 0, 1, 2, 0, 0, 0],
-    //     [0, 0, 0, 2, 1, 0, 0, 0],
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [0, 0, 0, 0, 0, 0, 0, 0],
-    //     [0, 0, 0, 0, 0, 0, 0, 0]
-    // ];
-
     constructor(props: Props) {
         super(props);
         const { gameType, id } = getGameInfoFromURL();
@@ -53,6 +42,7 @@ export class Board extends React.Component<Props, State> {
             board: [],
             winner: false,
             playerTurn: 1,
+            myTurn: true,
             player1Score: 2,
             player2Score: 2,
             possibleMoves: [],
@@ -69,6 +59,29 @@ export class Board extends React.Component<Props, State> {
     componentDidMount(): void {
         // get game info
         this.getGameInfo();
+
+        if (this.state.gameType === GameType.Online) {
+            socket.on('connect', () => {
+                console.log('connected')
+            })
+            socket.on('disconnect', () => {
+                console.log('disconnected')
+            })
+            socket.on('makeMove', (data) => {
+                this.getGameInfo();
+            })
+
+            socket.connect();
+        }
+    }
+
+    componentWillUnmount(): void {
+        if (this.state.gameType === GameType.Online) {
+            socket.disconnect();
+            socket.off('connect');
+            socket.off('disconnect');
+            socket.off('makeMove');
+        }
     }
 
     async getGameInfo() {
@@ -79,19 +92,32 @@ export class Board extends React.Component<Props, State> {
             player2Score: game.player2Score,
             possibleMoves: game.possibleMoves,
             winner: game.winner,
-            playerTurn: game.currentPlayer
+            playerTurn: game.currentPlayer,
+            myTurn: this.state.gameType === GameType.Online ? 
+                (game.player1.userID === this.props.token && game.currentPlayer === 1 
+                    || game.player2.userID === this.props.token && game.currentPlayer === 2) 
+                : game.currentPlayer === 1
         })
-        console.log(game)
+        console.log(game, this.state)
     }
 
     async makeMove(row: number, col: number) {
-        const res = await makeMove({
-            gameID: this.state.id, 
-            move: { x: row, y: col },
-            gameType: this.state.gameType
-        });
-        if (res) {
+        if (this.state.gameType === GameType.Online) {
+            socket.emit('makeMove', {
+                gameID: this.state.id,
+                move: { x: row, y: col },
+                gameType: this.state.gameType
+            });
             this.getGameInfo();
+        } else {
+            const res = await makeMove({
+                gameID: this.state.id, 
+                move: { x: row, y: col },
+                gameType: this.state.gameType
+            });
+            if (res) {
+                this.getGameInfo();
+            }
         }
     }
 
@@ -137,7 +163,7 @@ export class Board extends React.Component<Props, State> {
                                                         }}
                                                     >
                                                         {
-                                                            col === 0 ? 
+                                                            col === 0 && this.state.myTurn ? 
                                                             this.state.possibleMoves.some(move => move[0] === j && move[1] === i) ? 
                                                                     this.state.playerTurn !== 1 ? 
                                                                     <div 
