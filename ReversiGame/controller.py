@@ -7,6 +7,7 @@ from model.game import Reversi
 import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 import pymysql
 import uuid
 import copy
@@ -14,6 +15,7 @@ from db import DB
 
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 db = DB()
 
@@ -308,5 +310,25 @@ def eloCalculator(player_elo, enemy_elo, player_score, enemy_score):
         
     return int(player_elo + (change * (game_outcome - expected_score)))
 
+#  -------- SOCKET STUFF --------
+@socketio.on("connect")
+def connected():
+    """event listener when client connects to the server"""
+    print(request.sid)
+    print("client has connected")
+    emit("connect",{"data":f"id: {request.sid} is connected"})
 
-app.run()
+@socketio.on('json')
+def handle_message(data):
+    """event listener when client types a message"""
+    print("data from the front end: ",jsonify(data))
+    emit("data",{'data':data,'id':request.sid},broadcast=True)
+
+@socketio.on("disconnect")
+def disconnected():
+    """event listener when client disconnects to the server"""
+    print("user disconnected")
+    emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
+
+# running the server
+socketio.run(app)
