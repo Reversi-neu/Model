@@ -11,7 +11,7 @@ class ReversiAI:
         best_score = float('-inf')
 
         for move in possible_moves:
-            new_game = game.copy(game.board_size)
+            new_game = game.copy()
             new_game.make_move(move)
             new_game.change_cur_player()
             new_game.check_win()
@@ -44,7 +44,7 @@ class ReversiAI:
             max_eval = float('-inf')
             
             for move in game.possible_moves():
-                new_game = game.copy(game.board_size)
+                new_game = game.copy()
                 new_game.make_move(move)
                 new_game.change_cur_player()
                 new_game.check_win()
@@ -58,7 +58,7 @@ class ReversiAI:
             min_eval = float('inf')
 
             for move in game.possible_moves():
-                new_game = game.copy(game.board_size)
+                new_game = game.copy()
                 new_game.make_move(move)
                 new_game.change_cur_player()
                 new_game.check_win()
