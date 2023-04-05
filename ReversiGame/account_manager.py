@@ -23,11 +23,11 @@ class AccountManager:
         if (len(rv) == 0):
             return None
 
-        return {
+        return jsonify({
             'userID': rv[0][0],
             'username': rv[0][1],
             'password': rv[0][2],
-        }
+        })
 
     def login(self, username, password):
         rv = self.db.callDB('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))

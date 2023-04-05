@@ -157,8 +157,8 @@ def moveRoute():
 def createGameRoute():
     global game_id_counter
     requestBody = request.json
-    player1 = accountManager.getUserByID(requestBody['player1ID'])
-    player2 = accountManager.getUserByID(requestBody['player2ID'])
+    player1 = accountManager.getUserByID(requestBody['player1ID']).get_json()
+    player2 = accountManager.getUserByID(requestBody['player2ID']).get_json()
     size = requestBody['size']
     gameType = requestBody['gameType']
     difficulty = requestBody['difficulty'] or 0
@@ -185,7 +185,10 @@ def searchForLobby(data):
         for player2 in players_searching:
             res = (player1['id'] != player2['id'] and player1['size'] == player2['size'])
             if res:
-                gameDict = gamesManager.createGame(player1['id'], player2['id'], player1['size'], 'online', 0).get_json()
+                print('creating online game')
+                user1 = accountManager.getUserByID(player1['id']).get_json()
+                user2 = accountManager.getUserByID(player2['id']).get_json()
+                gameDict = gamesManager.createGame(user1, user2, player1['size'], 'online', 0).get_json()
 
                 emit("lobbyFound",gameDict,broadcast=True)
                 break
