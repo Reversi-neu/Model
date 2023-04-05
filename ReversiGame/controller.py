@@ -1,17 +1,11 @@
 from flask import Flask
-# from model import ReversiBoard
-# import model
-from model.game import Reversi
-#from controller.eloCalculator import eloCalculator
-# from ReversiGame.model import Reversi
 import datetime
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
-import pymysql
-import uuid
-import copy
 from db import DB
+from model.games_manager import GamesManager
+from account_manager import AccountManager
 
 app = Flask(__name__)
 CORS(app)
@@ -20,15 +14,6 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 db = DB()
 
 # -- helpers / future routes
-
-def getNextUserID():
-    rv = db.callDB('SELECT MAX(userID) FROM users', ())
-
-    if (len(rv) == 0):
-        return 1
-
-    return rv[0][0] + 1
-
 def getNextGameID():
     rv = db.callDB('SELECT MAX(gameID) FROM games', ())
 
@@ -37,210 +22,8 @@ def getNextGameID():
 
     return rv[0][0] + 1
 
-# -- global constants
-default_elo = 1000
-games = []
-game_id_counter : int = getNextGameID()
-players_searching = []
-
-# -- routes
-@app.route('/user/<userID>', methods=['GET'])
-def getUserByID(userID):
-    userID = int(userID)
-    if (userID == 0): # AI
-        return {
-            'userID': 0,
-            'username': None,
-            'password': None,
-        }
-
-    statement = 'SELECT * FROM users WHERE userID = %s'
-    rv = db.callDB(statement, (userID))
-
-    if (len(rv) == 0):
-        return None
-
-    return {
-        'userID': rv[0][0],
-        'username': rv[0][1],
-        'password': rv[0][2],
-    }
-
-@app.route('/login', methods=['POST'])
-def login():
-    requestBody = request.json
-    username = requestBody['username']
-    password = requestBody['password']
-
-    rv = db.callDB('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
-
-    if (len(rv) == 0):
-        return jsonify({
-            'userID': None,
-            'username': None,
-            'password': None,
-        })
-
-    return jsonify({
-        'userID': rv[0][0],
-        'username': rv[0][1],
-        'password': rv[0][2],
-    })
-
-@app.route('/signup', methods=['PUT'])
-def signup():
-    requestBody = request.json
-    username = requestBody['username']
-    password = requestBody['password']
-    newId = getNextUserID()
-    date = datetime.datetime.now()
-
-    db.callDB('INSERT INTO users VALUES (%s, %s, %s, %s)', (newId, username, password, date))
-    db.callDB('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
-    rv = db.callDB('SELECT * FROM users WHERE userID = %s', (newId))
-
-    if (len(rv) == 0):
-        return jsonify({
-            'userID': None,
-            'username': None,
-            'password': None,
-        })
-
-    return jsonify({
-        'userID': rv[0][0],
-        'username': rv[0][1],
-        'password': rv[0][2],
-    })
-
-@app.route('/guest', methods=['PUT'])
-def guest():
-    newId = getNextUserID()
-    date = datetime.datetime.now()
-
-    db.callDB('INSERT INTO users VALUES (%s, %s, %s, %s)', (newId, None, None, date))
-    db.callDB('INSERT INTO elo VALUES (%s, %s, %s)', (newId, default_elo, date))
-    rv = db.callDB('SELECT * FROM users WHERE userID = %s', (newId))
-
-    if (len(rv) == 0):
-        return jsonify({
-            'userID': None,
-            'username': None,
-            'password': None,
-        })
-
-    return jsonify({
-        'userID': rv[0][0],
-        'username': rv[0][1],
-        'password': rv[0][2],
-    })
-
-@app.route('/games/<gameType>/<userID>', methods=['GET'])
-def getGamesByTypeByUserID(gameType, userID):
-    playerGames = copy.deepcopy(list(
-        filter(lambda game: (game['player1']['userID'] == int(userID) or game['player2']['userID'] == int(userID)) 
-                and game['type'] == gameType, games)
-    ))
-    # need to pop game off here bc its not json serializable
-    for game in playerGames:
-        game.pop('game')
-
-    return jsonify(playerGames)
-
-@app.route('/games/<gameID>', methods=['GET'])
-def getGameByID(gameID):
-    game = copy.deepcopy(list(filter(lambda game: game['id'] == int(gameID), games))[0])
-    game.pop('game')
-    return jsonify(game)
-
-@app.route('/games', methods=['POST'])
-def moveRoute():
-    requestBody = request.json
-    gameType = requestBody['gameType']
-    gameID = requestBody['gameID']
-    move = requestBody['move']
-
-    return makeMove(gameType, gameID, move)
-
-@app.route("/games", methods=['PUT'])# do we create games with one player and put them on a lobby for others to join, or do we create the games with the two usernames
-def createGameRoute():
-    global game_id_counter
-    requestBody = request.json
-    player1ID = requestBody['player1ID']
-    player2ID = requestBody['player2ID']
-    size = requestBody['size']
-    gameType = requestBody['gameType']
-    difficulty = requestBody['difficulty'] or 0
-    newId = game_id_counter
-    game_id_counter += 1
-    # date = datetime.datetime.now()
-
-    return createGame(player1ID, player2ID, size, gameType, difficulty, newId)
-
-# ---- more helpers -----
-def createGame(player1ID, player2ID, size, gameType, difficulty, newId):
-    reversiBoard = Reversi(size, ai_depth = difficulty) if gameType == 'ai' else Reversi(size, ai_depth=0)
-
-    # this is basically where we define what our 'games' dicts are gonna look like (THIS IS ALL THE STUFF I WANT FOR THE FRONT END, IT GOTTA BE UPDATED W/ THE GAME)
-    game = {
-        "id": newId, 
-        "game": reversiBoard, 
-        "board": reversiBoard.board.get_grid(),
-        "type": gameType, 
-        "size": size, 
-        "difficulty": difficulty,
-        "player1": getUserByID(player1ID), 
-        "player2": getUserByID(player2ID), 
-        "winner": None, 
-        "player1Score": 2, 
-        "player2Score": 2, 
-        "currentPlayer": 1, 
-        "possibleMoves": reversiBoard.possible_moves(),
-        "active": True
-    }
-    games.append(game)
-    
-    g_copy = copy.deepcopy(game)
-    g_copy.pop('game')
-    return jsonify(g_copy)
-
-def makeMove(gameType, gameID, move):
-    game = list(filter(lambda game: game['id'] == int(gameID), games))[0]
-    game['game'].make_move([move["x"], move["y"]])
-
-    # this logic is not good, maybe... either the bot is goated and i suck, or its cheating and i cant tell
-    game['game'].change_cur_player()
-    possibleMoves = game['game'].possible_moves()
-    if (len(possibleMoves) == 0):
-        game['game'].change_cur_player()
-    elif (gameType == 'ai'):
-        while True:
-            game['game'].make_move(game['game'].get_ai_move())
-            game['game'].change_cur_player()
-            possibleMoves = game['game'].possible_moves()
-            if game['game'].check_win(): break
-            if (len(possibleMoves) == 0):
-                game['game'].change_cur_player()
-            else:
-                break
-    
-    game['winner'] = game['game'].check_win()
-    if (game['winner']):
-        postgame(int(gameID))
-        #set game inactive
-        game["active"] = False
-
-    game['player1Score'] = game['game'].player1_score
-    game['player2Score'] = game['game'].player2_score
-    game['board'] = game['game'].board.get_grid()
-    game['currentPlayer'] = game['game'].cur_player
-    game['possibleMoves'] = game['game'].possible_moves()
-
-    game_copy = copy.deepcopy(game)
-    game_copy.pop('game')
-    return jsonify(game_copy)
-
 def postgame(gameID):
-    game = list(filter(lambda game: game['id'] == gameID, games))[0]
+    game = gamesManager.getGameByID(gameID).get_json()
     print(game)
     player1ID = game['player1']['userID']
     player2ID = game['player2']['userID']
@@ -253,8 +36,6 @@ def postgame(gameID):
         winnerID = player1ID
     elif game['player1Score'] < game['player2Score']:
         winnerID = player2ID
-    # elif game['player1Score'].userID == game['player2Score'].userID:
-    #     winnerID = None
     else: 
         winnerID = None
     
@@ -321,53 +102,108 @@ def eloCalculator(player_elo, enemy_elo, player_score, enemy_score):
         
     return int(player_elo + (change * (game_outcome - expected_score)))
 
+# -- global variables
+gamesManager = GamesManager(getNextGameID())
+accountManager = AccountManager()
+players_searching = []
+
+# -- routes
+@app.route('/user/<userID>', methods=['GET'])
+def getUserByID(userID):
+    return accountManager.getUserByID(userID).get_json()
+
+@app.route('/login', methods=['POST'])
+def login():
+    requestBody = request.json
+    username = requestBody['username']
+    password = requestBody['password']
+
+    return accountManager.login(username, password).get_json()
+
+@app.route('/signup', methods=['PUT'])
+def signup():
+    requestBody = request.json
+    username = requestBody['username']
+    password = requestBody['password']
+    
+    return accountManager.signup(username, password).get_json()
+
+@app.route('/guest', methods=['PUT'])
+def guest():
+    return accountManager.guest().get_json()
+
+@app.route('/games/<gameType>/<userID>', methods=['GET'])
+def getGamesByTypeByUserID(gameType, userID):
+    return gamesManager.getGamesByTypeByUserID(gameType, userID).get_json();
+
+@app.route('/games/<gameID>', methods=['GET'])
+def getGameByID(gameID):
+    return gamesManager.getGameByID(gameID).get_json();
+
+@app.route('/games', methods=['POST'])
+def moveRoute():
+    requestBody = request.json
+    gameType = requestBody['gameType']
+    gameID = requestBody['gameID']
+    move = requestBody['move']
+
+    gameDict = gamesManager.makeMove(gameType, gameID, move).get_json()
+    if (gameDict['winner']):
+        postgame(gameID)
+
+    return gameDict
+
+@app.route("/games", methods=['PUT'])
+def createGameRoute():
+    global game_id_counter
+    requestBody = request.json
+    player1 = accountManager.getUserByID(requestBody['player1ID'])
+    player2 = accountManager.getUserByID(requestBody['player2ID'])
+    size = requestBody['size']
+    gameType = requestBody['gameType']
+    difficulty = requestBody['difficulty'] or 0
+
+    return gamesManager.createGame(player1, player2, size, gameType, difficulty).get_json()
+
 #  -------- SOCKET STUFF --------
 @socketio.on("connect")
 def connected():
-    """event listener when client connects to the server"""
-
     print("client has connected: ", request.sid)
     emit("connect",{"data":f"id: {request.sid} is connected"})
 
 @socketio.on('makeMove')
 def handleSocketMove(data):
-    """event listener when client makes a move"""
-
     # only gotta make move here and not return shit, bc the frontend will get game info on socket 'makeMove'
-    makeMove(data['gameType'],data["gameID"],data["move"])
+    gamesManager.makeMove(data['gameType'],data["gameID"],data["move"])
     emit("makeMove",{},broadcast=True)
 
 @socketio.on('searchForLobby')
 def searchForLobby(data):
-    """event listener when client searches for game lobby"""
-
     players_searching.append(data)
     print(players_searching)
     for player1 in players_searching:
         for player2 in players_searching:
             res = (player1['id'] != player2['id'] and player1['size'] == player2['size'])
             if res:
-                global game_id_counter
-                gameDict = createGame(player1['id'], player2['id'], player1['size'], 'online', 0, game_id_counter)
-                game_id_counter += 1
+                gameDict = gamesManager.createGame(player1['id'], player2['id'], player1['size'], 'online', 0).get_json()
 
-                emit("lobbyFound",gameDict.get_json(),broadcast=True)
+                emit("lobbyFound",gameDict,broadcast=True)
                 break
 
 @socketio.on('cancelLobbySearch')
 def cancelLobbySearch(data):
-    """event listener when client searches for game lobby"""
-
     print('canceling', data)
     global players_searching
     players_searching = list(filter(lambda player: player['id'] == data['id'], players_searching))
 
 @socketio.on("disconnect")
 def disconnected():
-    """event listener when client disconnects to the server"""
-
     print("user disconnected")
     emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
+
+#if __name__ == "__main__":
+#    from waitress import serve
+#    serve(app, host="0.0.0.0", port=8080)
 
 # running the server
 socketio.run(app)

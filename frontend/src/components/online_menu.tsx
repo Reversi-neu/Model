@@ -43,7 +43,9 @@ export function OnlineMenu() {
 
     const foundLobby = (data: any) => {
         console.log(data);
-        window.location.href = `/play/online/${data.id}`;
+        if (data.player1.id === token || data.player2.id === token) {
+            window.location.href = `/play/online/${data.id}`;
+        }
     }
 
     return (

@@ -1,20 +1,17 @@
 from model.player import Player
 from model.board import Board
 from model.classic_mode import ClassicMode
-from model.reversi_ai import ReversiAI
+from model.reversi_interface import ReversiInterface
 
-class Reversi:
+class Reversi(ReversiInterface):
     # ai_depth 0 means no AI in game
-    def __init__(self, size=8, game_logic=ClassicMode(), ai_depth=0): 
+    def __init__(self, size=8, game_logic=ClassicMode()): 
         self.board = Board(size, board=[])
         self.board_size = size
         self.cur_player = Player.black
         self.game_logic = game_logic
         self.player1_score = 2
         self.player2_score = 2
-
-        if ai_depth != 0:
-            self.ai = ReversiAI(ai_depth)
 
         self.game_logic.get_size(size)
 
@@ -26,10 +23,6 @@ class Reversi:
     def is_valid_move(self, move):
         # returns False if not valid
         return self.game_logic.is_move_possible(self.board.get_grid(), move, self.cur_player.value)
-
-    def get_ai_move(self):
-        self.check_win()
-        return self.ai.get_best_move(self.copy())
     
     def make_move(self, move):
         gained_tiles = self.game_logic.make_move(self.board.get_grid(), move, self.cur_player.value)
