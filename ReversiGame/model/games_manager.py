@@ -62,7 +62,7 @@ class GamesManager:
         game['player1Score'] = game['game'].player1Score
         game['player2Score'] = game['game'].player2Score
         game['board'] = game['game'].board.getGrid()
-        game['currentPlayer'] = game['game'].cur_player
+        game['currentPlayer'] = game['game'].curPlayer
         game['possibleMoves'] = game['game'].possibleMoves()
 
         game_copy = copy.deepcopy(game)
