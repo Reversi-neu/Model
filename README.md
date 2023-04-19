@@ -10,6 +10,5 @@ REQUIRMENTS NEEDED:
 - Leaderboard of the top 5 players by ELO
   - Prob want to move elo calculator out of controller to the model as it's own file
 - We think we have it, stores games in event of a crash to be recovered
-- Incorporate 5 design patterns
 - Comment and standardize our code
 - Unit tests
