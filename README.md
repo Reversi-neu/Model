@@ -1,3 +1,7 @@
+# Deployment
+Frontend can be found here [https://reversi-2023.vercel.app/](https://reversi-2023.vercel.app/)
+Backend can be found here [https://reversi-backend-4520.herokuapp.com/](https://reversi-backend-4520.herokuapp.com/)
+
 # Model
 Contains the game, server, others...
 
