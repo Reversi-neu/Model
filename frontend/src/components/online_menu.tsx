@@ -7,6 +7,7 @@ import { socket } from '../services/socket';
 import { createGame } from "../services/game_service";
 import { toast, ToastContainer } from "react-toastify";
 
+// Online menu component, shows online lobby + search
 export function OnlineMenu() {
 
     const {token} = useToken();

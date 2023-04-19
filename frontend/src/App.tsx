@@ -11,6 +11,7 @@ import { OnlineMenu } from './components/online_menu';
 import { LobbyManager } from './components/lobbies_manager';
 import { Leaderboard } from './components/leaderboard';
 
+// App is the main component of the application
 function App() {
   const { token, setToken } = useToken();
   
@@ -29,11 +30,9 @@ function App() {
         }/>
         <Route path="online" element={
           <OnlineMenu/>
-          // <Board token={token} gameType={GameType.Online}/>
         }/>
         <Route path="local" element={
           <LocalMenu/>
-          // <Board token={token} gameType={GameType.Local}/>
         }/>
         <Route path="play/:gameType" element={ 
           <LobbyManager/>
@@ -44,9 +43,6 @@ function App() {
         <Route path="leaderboard" element={
           <Leaderboard />
         }/>
-        {/* <Route path="ai" element={
-          <Board token={token} gameType={GameType.AI}/>
-        }/> */}
       </Routes>
     </BrowserRouter>
   );

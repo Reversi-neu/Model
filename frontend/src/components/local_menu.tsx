@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+// LocalMenu component, shows the local menu with the options to play against AI or against another human(locally)
 export function LocalMenu() {
     return (
         <div className="App">

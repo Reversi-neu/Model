@@ -1,6 +1,7 @@
 from flask_socketio import SocketIO, emit
 from flask import Flask, request
 
+# SocketManager class - the class that handles the socket connections
 class SocketManager:
 
     def __init__(self, app, gamesManager, accountManager):
@@ -10,16 +11,21 @@ class SocketManager:
         self.accountManager = accountManager
         self.players_searching = []
 
+        # ---- Socket routes ------
+
+        # client has connected
         @self.socketio.on("connect")
         def connected():
             print("client has connected: ", request.sid)
             emit("connect",{"data":f"id: {request.sid} is connected"})
 
+        # client has made a move in a game
         @self.socketio.on('makeMove')
         def handleSocketMove(data):
             gamesManager.makeMove(data['gameType'],data["gameID"],data["move"])
             emit("makeMove",{},broadcast=True)
 
+        # client wants to search for a lobby
         @self.socketio.on('searchForLobby')
         def searchForLobby(data):
             self.players_searching.append(data)
@@ -38,15 +44,18 @@ class SocketManager:
                         emit("lobbyFound",gameDict,broadcast=True)
                         break
 
+        # client wants to cancel a lobby search
         @self.socketio.on('cancelLobbySearch')
         def cancelLobbySearch(data):
             print('canceling', data)
             self.players_searching = list(filter(lambda player: player['id'] == data['id'], self.players_searching))
 
+        # client has disconnected
         @self.socketio.on("disconnect")
         def disconnected():
             print("user disconnected")
             emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
     
+    # run the socket server
     def run(self):
         self.socketio.run(self.app, debug=False)

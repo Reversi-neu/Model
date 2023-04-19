@@ -11,11 +11,14 @@ class APIManager:
         self.accountManager = accountManager
         self.db = DB()
 
-        # App routes
+        # ---- App routes ------
+
+        # Get user by ID, returns a user object
         @app.route('/user/<userID>', methods=['GET'])
         def getUserByID(userID):
             return accountManager.getUserByID(userID).get_json()
 
+        # Get user by username, returns a user object
         @app.route('/login', methods=['POST'])
         def login():
             requestBody = request.json
@@ -24,6 +27,7 @@ class APIManager:
 
             return accountManager.login(username, password).get_json()
 
+        # Create a new user, returns a user object
         @app.route('/signup', methods=['PUT'])
         def signup():
             requestBody = request.json
@@ -32,18 +36,22 @@ class APIManager:
             
             return accountManager.signup(username, password).get_json()
 
+        # Get a guest user, returns a user object
         @app.route('/guest', methods=['PUT'])
         def guest():
             return accountManager.guest().get_json()
 
+        # Gets all games for a user with a given game type, returns a list of game objects
         @app.route('/games/<gameType>/<userID>', methods=['GET'])
         def getGamesByTypeByUserID(gameType, userID):
             return gamesManager.getGamesByTypeByUserID(gameType, userID).get_json();
 
+        # Gets a game by ID, returns a game object
         @app.route('/games/<gameID>', methods=['GET'])
         def getGameByID(gameID):
             return gamesManager.getGameByID(gameID).get_json();
 
+        # Makes a move in a game, returns a game object
         @app.route('/games', methods=['POST'])
         def moveRoute():
             requestBody = request.json
@@ -57,6 +65,7 @@ class APIManager:
 
             return gameDict
 
+        # Creates a new game, returns a game object
         @app.route("/games", methods=['PUT'])
         def createGameRoute():
             global game_id_counter
@@ -69,10 +78,12 @@ class APIManager:
 
             return gamesManager.createGame(player1, player2, size, gameType, difficulty).get_json()
 
+        # Gets the leaderboard, returns a list of user objects
         @app.route("/leaderboard", methods=['GET'])
         def getLeaderboard():
             return accountManager.getLeaderboard().get_json()
     
+    # helper function to update the DB after a game is finished
     def postgame(self, gameID):
         game = self.gamesManager.getGameByID(gameID).get_json()
         print(game)
@@ -139,6 +150,7 @@ class APIManager:
             data = (player2New, finishTime, aiID)
             self.db.callself.db(statement, data)
 
+    # helper function to calculate elo
     def eloCalculator(self, player_elo, enemy_elo, player_score, enemy_score):
         # Variables to customize elo gains and loses
         diff = 400

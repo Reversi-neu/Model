@@ -3,6 +3,7 @@ import "../App.scss"
 import { useToken } from "../hooks/use_token";
 import { signupGuest } from "../services/user_service";
 
+// Title component is the main menu of the application
 export function Title() {
     const { token, setToken } = useToken();
 

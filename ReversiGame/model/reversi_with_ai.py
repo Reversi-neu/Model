@@ -2,6 +2,7 @@ from model.reversi_interface import ReversiInterface
 from model.reversi_ai import ReversiAI
 import copy
 
+# ReversiAIProxy class - used for design pattern proxy and AI implementation
 class ReversiAIProxy(ReversiInterface):
     def __init__(self, reversi, ai_depth=0):
         self.reversi = reversi

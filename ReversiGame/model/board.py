@@ -1,5 +1,6 @@
 from model.player import Player
 
+# Board class, holds the board and the size of the board
 class Board:
     def __init__(self, size, board=[]):
         self.size = size

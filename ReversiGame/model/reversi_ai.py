@@ -1,7 +1,9 @@
+# Reversi AI class - AI implementation for Reversi game
 class ReversiAI:
     def __init__(self, depth):
         self.depth = depth
 
+    # Returns the best move for the AI
     def get_best_move(self, game):
         possibleMoves = game.possibleMoves()
         if not possibleMoves:
@@ -33,6 +35,7 @@ class ReversiAI:
 
         #return possibleMoves[0]
 
+    # Minimax algorithm for AI - returns the best score for the AI
     def minimax(self, game, depth, maximizing):
         if depth == 0 or game.checkWin():
             if game.curPlayer == 1:

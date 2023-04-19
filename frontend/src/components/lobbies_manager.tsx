@@ -7,6 +7,7 @@ import React from "react";
 import Slider from '@mui/material/Slider';
 import { toast, ToastContainer } from "react-toastify";
 
+// Lobby manager component, shows the lobbies for a specific game type
 export function LobbyManager() {
     const { token } = useToken();
     const { gameType } = useParams<{gameType: string}>() as {gameType: GameType};

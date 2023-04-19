@@ -18,6 +18,7 @@ class DB:
             db = 'defaultdb',       
         )
     
+    # Calls the DB with a statement and data
     def callDB(self, statement, data):
         cursor = self.conn.cursor()
         cursor.execute(statement, data)

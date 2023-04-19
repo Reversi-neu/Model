@@ -3,6 +3,7 @@ import "../App.scss"
 import { useToken } from "../hooks/use_token";
 import { getUserByID } from "../services/user_service";
 
+// Settings component, shows the user info
 export function Settings() {
     const { token, setToken } = useToken();
     const [username, setUsername] = React.useState("");

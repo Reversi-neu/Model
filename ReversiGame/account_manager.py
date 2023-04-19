@@ -2,12 +2,14 @@ from db import DB
 from flask import jsonify
 import datetime
 
+# AccountManager class - manages all account related actions
 class AccountManager:
 
     def __init__(self):
         self.db = DB()
         self.default_elo = 1000
     
+    # Gets a user by ID, returns a user object
     def getUserByID(self, userID):
         userID = int(userID)
         if (userID == 0): # AI
@@ -29,6 +31,7 @@ class AccountManager:
             'password': rv[0][2],
         })
 
+    # Gets user by username and password, returns a user object
     def login(self, username, password):
         rv = self.db.callDB('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
 
@@ -45,6 +48,7 @@ class AccountManager:
             'password': rv[0][2],
         })
 
+    # Creates a new user, returns a user object
     def signup(self, username, password):
         newId = self.getNextUserID()
         date = datetime.datetime.now()
@@ -66,6 +70,7 @@ class AccountManager:
             'password': rv[0][2],
         })
 
+    # Creates a guest user, returns a user object
     def guest(self):
         newId = self.getNextUserID()
         date = datetime.datetime.now()
@@ -87,6 +92,7 @@ class AccountManager:
             'password': rv[0][2],
         })
     
+    # Gets the next user ID from the DB
     def getNextUserID(self):
         rv = self.db.callDB('SELECT MAX(userID) FROM users', ())
 
@@ -95,6 +101,7 @@ class AccountManager:
 
         return rv[0][0] + 1
     
+    # Gets the elo leaderboard for users
     def getLeaderboard(self):
         rv = self.db.callDB('SELECT * FROM elo WHERE userID > 0 ORDER BY elo DESC', ())
         res = []

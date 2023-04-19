@@ -7,6 +7,7 @@ from model.games_manager import GamesManager
 from account_manager import AccountManager
 from socket_manager import SocketManager
 
+# Server class - the main class of the server
 class Server:
 
     def __init__(self):
@@ -19,11 +20,11 @@ class Server:
         self.apiManager = APIManager(self.app, self.gamesManager, self.accountManager)
         self.socketManager = SocketManager(self.app, self.gamesManager, self.accountManager)
 
+    # running the server
     def run(self):
-        # running the server
         self.socketManager.run()
 
-    # -- helper
+    # helper function to get the next game ID from the DB
     def getNextGameID(self):
         rv = self.db.callDB('SELECT MAX(gameID) FROM games', ())
 

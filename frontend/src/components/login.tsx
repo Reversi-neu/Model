@@ -14,6 +14,7 @@ interface Props {
     setToken: (token: string) => void;
 }
 
+// Login component, allows users to login or signup
 export class Login extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);

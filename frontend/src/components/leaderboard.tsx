@@ -4,6 +4,7 @@ import { useToken } from "../hooks/use_token";
 import { getLeaderboard, getUserByID } from "../services/user_service";
 import { useCallback, useEffect, useState } from "react";
 
+// Leaderboard component, shows the leaderboard
 export function Leaderboard() {
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
 

@@ -6,6 +6,7 @@ import { faHouse, faUser, faBackward } from '@fortawesome/free-solid-svg-icons';
 import { useToken } from "../../hooks/use_token";
 import React from "react";
 
+// Sidebar component, shows the sidebar for settings, home, back, etc...
 export function Sidebar() {
     const { token } = useToken();
     const [sidebar, setSidebar] = React.useState(false);

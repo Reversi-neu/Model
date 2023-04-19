@@ -5,12 +5,14 @@ from flask import jsonify
 from model.game import Reversi
 from model.reversi_with_ai import ReversiAIProxy
 
+# GamesManager class - the class that manages all the games
 class GamesManager:
 
     def __init__(self, gameIdCounter):
         self.games = []
         self.gameIdCounter = gameIdCounter
 
+    # create a new game, returns a jsonified game dict
     def createGame(self, player1, player2, size, gameType, difficulty):
         reversiBoard = ReversiAIProxy(Reversi(size), ai_depth=difficulty) if gameType == 'ai' else Reversi(size)
 
@@ -38,6 +40,7 @@ class GamesManager:
         g_copy.pop('game')
         return jsonify(g_copy)
     
+    # makes a move in a game, returns a jsonified game dict
     def makeMove(self, gameType, gameID, move):
         game = list(filter(lambda game: game['id'] == int(gameID), self.games))[0]
         game['game'].makeMove([move["x"], move["y"]])
@@ -69,6 +72,7 @@ class GamesManager:
         game_copy.pop('game')
         return jsonify(game_copy)
 
+    # returns a list of all the games with the given gameType and userID
     def getGamesByTypeByUserID(self, gameType, userID):
         playerGames = copy.deepcopy(list(
             filter(lambda game: (game['player1']['userID'] == int(userID) or game['player2']['userID'] == int(userID)) 
@@ -80,6 +84,7 @@ class GamesManager:
 
         return jsonify(playerGames)
 
+    # return a game with the given gameID
     def getGameByID(self, gameID):
         game = copy.deepcopy(list(filter(lambda game: game['id'] == int(gameID), self.games))[0])
         game.pop('game')

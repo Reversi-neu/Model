@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+# Interface for Reversi game
 class ReversiInterface(ABC):
 
     @abstractmethod

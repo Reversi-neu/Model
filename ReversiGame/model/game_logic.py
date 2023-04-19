@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+# Interface for game logic
 class GameLogic(ABC):
     def __init__(self):
         self.size = 8

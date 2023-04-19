@@ -32,6 +32,7 @@ interface Props {
     token: string;
 }
 
+// BOARD COMPONENT, SHOWS THE BOARD AND HANDLES THE GAME LOGIC(calls out to backend for actual logic, but deals with clicks, etc...)
 export class Board extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
