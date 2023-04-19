@@ -2,6 +2,29 @@ from model.game_logic import GameLogic
 
 # Classic mode game logic, inherits from GameLogic
 class ClassicMode(GameLogic):
+    """
+    A concrete implementation of the interface class for 
+    the appropriate game rules.
+    
+    Attributes
+    ----------
+    size : int
+        Size of the board
+        
+    Methods
+    -------
+    getSize(s):
+        Gets the size of the game board
+    isMoveOnBoard(x, y):
+        Checks if move is within board boundaries
+    isMovePossible(board, move, player):
+        Checks if move made is legal
+    makeMove(board, move, player):
+        Makes a move on the board and updates the tiles
+    possibleMoves(board, player):
+        Returns array of possible moves for the player
+    """
+    
     DIRECTIONS = [[0, 1], [1, 1], [1, 0], [1, -1],
                   [0, -1], [-1, -1], [-1, 0], [-1, 1]]
 
@@ -9,12 +32,50 @@ class ClassicMode(GameLogic):
         self.size = 8
 
     def getSize(self, s):
+        """
+        Gets the size of the board
+        
+        Parameters
+        ----------
+        s : int
+            Size of the board
+        """
+        
         self.size = s
 
     def isMoveOnBoard(self, x, y):
+        """
+        Checks if move is within board boundaries
+        
+        Parameters
+        ----------
+        x: int
+            X pos of move
+        y: int
+            Y pos of move
+            
+        Returns
+        -------
+        boolean :
+            True on legal move
+        """
+        
         return 0 <= x < self.size and 0 <= y < self.size
 
     def isMovePossible(self, board, move, player):
+        """
+        Checks if move is legal
+        
+        Parameters
+        ----------
+        board : int[]
+            Board array
+        move : int[2]
+            Coordinate of the move
+        player : int
+            Current player turn
+        """
+        
         x, y = move
 
         # Check if move is on the board
@@ -55,6 +116,24 @@ class ClassicMode(GameLogic):
         return False
 
     def makeMove(self, board, move, player):
+        """
+        Makes a move and updates tiles
+        
+        Parameters
+        ----------
+        board : int[]
+            Board array
+        move : int[2]
+            Coordinate of the move
+        player : int
+            Current player turn
+            
+        Returns
+        -------
+        gainedTiles : int[]
+            Array of the tiles gained by the players move
+        """
+        
         x, y = move
     
         # Store gained tiles before checking in every dir
@@ -88,6 +167,22 @@ class ClassicMode(GameLogic):
         return gainedTiles
 
     def possibleMoves(self, board, player):
+        """
+        Returns list of possible player moves
+        
+        Parameters
+        ----------
+        board : int[]
+            Board array
+        player : int
+            Current player turn
+            
+        Returns
+        -------
+        moves : int[]
+            Array of legal move coordinates
+        """
+        
         moves = []
 
         for i in range(self.size):
@@ -98,6 +193,20 @@ class ClassicMode(GameLogic):
         return moves
 
     def checkWin(self, board):
+        """
+        Checks the state of the game and for a win
+        
+        Parameters
+        ----------
+        board : int[]
+            Board array
+            
+        Returns
+        -------
+        boolean :
+            True on game end
+        """
+        
         # Check if current player has no possible moves
         return not self.possibleMoves(board, 1) and not self.possibleMoves(board, 2)
 
