@@ -28,7 +28,7 @@ export function LobbyManager() {
     const handleCreateGame = async () => {
         await createGame({
             player1ID: token,
-            player2ID: 9,
+            player2ID: 0,
             gameType: gameType,
             size: size,
             difficulty: aiDifficulty,

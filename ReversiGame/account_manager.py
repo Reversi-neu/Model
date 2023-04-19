@@ -11,11 +11,11 @@ class AccountManager:
     def getUserByID(self, userID):
         userID = int(userID)
         if (userID == 0): # AI
-            return {
+            return jsonify({
                 'userID': 0,
                 'username': None,
                 'password': None,
-            }
+            })
 
         statement = 'SELECT * FROM users WHERE userID = %s'
         rv = self.db.callDB(statement, (userID))

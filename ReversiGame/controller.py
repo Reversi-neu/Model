@@ -211,9 +211,5 @@ def disconnected():
     print("user disconnected")
     emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
 
-#if __name__ == "__main__":
-#    from waitress import serve
-#    serve(app, host="0.0.0.0", port=8080)
-
 # running the server
 socketio.run(app)

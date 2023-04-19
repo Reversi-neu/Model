@@ -11,11 +11,11 @@ class DB:
 
     def __init__(self):
         self.conn = pymysql.connect(
-            host= 'reversi-db.co96znypdwjk.us-east-2.rds.amazonaws.com', 
-            port = 3306,
-            user = 'admin', 
-            password = 'e5YVS9D11OBvShYwu8gA',
-            db = 'reversidb',       
+            host= 'db-mysql-nyc1-85325-do-user-13962965-0.b.db.ondigitalocean.com', 
+            port = 25060,
+            user = 'doadmin', 
+            password = 'AVNS_v0OQGBVJBtwYNqGbtRs',
+            db = 'defaultdb',       
         )
     
     def callDB(self, statement, data):
