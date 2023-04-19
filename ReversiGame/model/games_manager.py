@@ -3,7 +3,7 @@
 import copy
 from flask import jsonify
 from model.game import Reversi
-from model.reversi_with_ai import ReversiWithAI
+from model.reversi_with_ai import ReversiAIProxy
 
 class GamesManager:
 
@@ -12,7 +12,7 @@ class GamesManager:
         self.gameIdCounter = gameIdCounter
 
     def createGame(self, player1, player2, size, gameType, difficulty):
-        reversiBoard = ReversiWithAI(Reversi(size), ai_depth=difficulty) if gameType == 'ai' else Reversi(size)
+        reversiBoard = ReversiAIProxy(Reversi(size), ai_depth=difficulty) if gameType == 'ai' else Reversi(size)
 
         # this is basically where we define what our 'games' dicts are gonna look like (THIS IS ALL THE STUFF I WANT FOR THE FRONT END, IT GOTTA BE UPDATED W/ THE GAME)
         game = {

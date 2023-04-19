@@ -165,6 +165,13 @@ def createGameRoute():
 
     return gamesManager.createGame(player1, player2, size, gameType, difficulty).get_json()
 
+@app.route("/leaderboard", methods=['GET'])
+def getLeaderboard():
+    requestBody = request.json
+    PlayerID = 0
+
+    return 
+
 #  -------- SOCKET STUFF --------
 @socketio.on("connect")
 def connected():

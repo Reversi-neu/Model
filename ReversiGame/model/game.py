@@ -2,8 +2,9 @@ from model.player import Player
 from model.board import Board
 from model.classic_mode import ClassicMode
 from model.reversi_interface import ReversiInterface
+from model.game_prototype import GamePrototype
 
-class Reversi(ReversiInterface):
+class Reversi(ReversiInterface, GamePrototype):
     # ai_depth 0 means no AI in game
     def __init__(self, size=8, game_logic=ClassicMode()): 
         self.board = Board(size, board=[])
