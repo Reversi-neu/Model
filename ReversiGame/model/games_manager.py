@@ -7,6 +7,27 @@ from model.reversi_with_ai import ReversiAIProxy
 
 # GamesManager class - the class that manages all the games
 class GamesManager:
+    """ 
+    Class in charge of communcating and managing every game in the system
+    
+    Attributes
+    ----------
+    games : Reversi()[]
+        Stores the games being played
+    gameIdCounter : int
+        Keeps track of game ID location
+    
+    Methods
+    -------
+    createGame(player1, player2, size, gameType, difficulty)
+        Create a new game of any type
+    makeMove(gameType, gameID, move)
+        Makes a move on a certain game
+    getGamesByTypeByUserID(gameType, userID)
+        Gets the games by type and userID
+    getGameByID(gameID)
+        Gets game by it's game ID
+    """
 
     def __init__(self, gameIdCounter):
         self.games = []
