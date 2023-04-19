@@ -167,10 +167,7 @@ def createGameRoute():
 
 @app.route("/leaderboard", methods=['GET'])
 def getLeaderboard():
-    requestBody = request.json
-    PlayerID = 0
-
-    return 
+    return accountManager.getLeaderboard().get_json()
 
 #  -------- SOCKET STUFF --------
 @socketio.on("connect")

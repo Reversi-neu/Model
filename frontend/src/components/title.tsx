@@ -33,6 +33,7 @@ export function Title() {
                     <>
                         <Link to="local">Play Local</Link>
                         <Link to="online">Play Online</Link>
+                        <Link to="leaderboard">Leaderboard</Link>
                     </>
                 }
                 {

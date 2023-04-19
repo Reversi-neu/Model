@@ -37,3 +37,12 @@ export async function signupGuest() {
         }
     }).then(data => data.json());
 }
+
+export async function getLeaderboard() {
+    return fetch(process.env.REACT_APP_API_URL!+'/leaderboard', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(data => data.json());
+}

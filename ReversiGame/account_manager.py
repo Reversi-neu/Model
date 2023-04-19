@@ -94,3 +94,16 @@ class AccountManager:
             return 1
 
         return rv[0][0] + 1
+    
+    def getLeaderboard(self):
+        rv = self.db.callDB('SELECT * FROM elo WHERE userID > 0 ORDER BY elo DESC', ())
+        res = []
+        for i in range(len(rv)):
+            res.append({
+                'username': self.getUserByID(rv[i][0]).get_json()['username'],
+                'userID': rv[i][0],
+                'elo': rv[i][1],
+                'date': rv[i][2],
+            })
+        
+        return jsonify(res)
