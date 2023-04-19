@@ -7,17 +7,17 @@ class ClassicMode(GameLogic):
     def __init__(self):
         self.size = 8
 
-    def get_size(self, s):
+    def getSize(self, s):
         self.size = s
 
-    def is_move_on_board(self, x, y):
+    def isMoveOnBoard(self, x, y):
         return 0 <= x < self.size and 0 <= y < self.size
 
-    def is_move_possible(self, board, move, player):
+    def isMovePossible(self, board, move, player):
         x, y = move
 
         # Check if move is on the board
-        if not self.is_move_on_board(x, y):
+        if not self.isMoveOnBoard(x, y):
             return False
 
         # Check if tile picked is empty
@@ -25,79 +25,79 @@ class ClassicMode(GameLogic):
             return False
 
         # Check tiles in all directions from selection
-        for x_dir, y_dir in self.DIRECTIONS:
-            x_pos, y_pos = x, y
-            x_pos += x_dir
-            y_pos += y_dir
+        for xDir, yDir in self.DIRECTIONS:
+            xpos, ypos = x, y
+            xpos += xDir
+            ypos += yDir
 
             # Check if tile is on board 
-            if not self.is_move_on_board(x_pos, y_pos):
+            if not self.isMoveOnBoard(xpos, ypos):
                 continue 
 
             # Check if next tile is an enemy
-            if board[y_pos][x_pos] == player:
+            if board[ypos][xpos] == player:
                 continue
 
             # Continues while still enemies
-            while board[y_pos][x_pos] == 3-player:
-                x_pos += x_dir
-                y_pos += y_dir
+            while board[ypos][xpos] == 3-player:
+                xpos += xDir
+                ypos += yDir
 
                 # Check if tile is on board
-                if not self.is_move_on_board(x_pos, y_pos):
+                if not self.isMoveOnBoard(xpos, ypos):
                     break
 
                 # Check if next tile is an enemy
-                if board[y_pos][x_pos] == player:
+                if board[ypos][xpos] == player:
                     return True
 
         return False
 
-    def make_move(self, board, move, player):
+    def makeMove(self, board, move, player):
         x, y = move
     
         # Store gained tiles before checking in every dir
-        gained_tiles = []
-        for x_dir, y_dir in self.DIRECTIONS:
-            x_pos, y_pos = x, y
-            x_pos += x_dir
-            y_pos += y_dir
+        gainedTiles = []
+        for xDir, yDir in self.DIRECTIONS:
+            xpos, ypos = x, y
+            xpos += xDir
+            ypos += yDir
 
             # Jump over enemy tiles
-            temp_array = []
-            if self.is_move_on_board(x_pos, y_pos):
-                while board[y_pos][x_pos] == 3-player:
-                    temp_array.append([x_pos, y_pos])
-                    x_pos += x_dir
-                    y_pos += y_dir
+            tempArray = []
+            if self.isMoveOnBoard(xpos, ypos):
+                while board[ypos][xpos] == 3-player:
+                    tempArray.append([xpos, ypos])
+                    xpos += xDir
+                    ypos += yDir
 
                     # Check if tile is on board
-                    if not self.is_move_on_board(x_pos, y_pos):
+                    if not self.isMoveOnBoard(xpos, ypos):
                         break
 
                 # Player tile after enemy tiles
-                if self.is_move_on_board(x_pos, y_pos):
-                    if board[y_pos][x_pos] == player:
-                        for tiles in temp_array:
-                            gained_tiles.append(tiles)  # Taken tile found
+                if self.isMoveOnBoard(xpos, ypos):
+                    if board[ypos][xpos] == player:
+                        for tiles in tempArray:
+                            gainedTiles.append(tiles)  # Taken tile found
 
 
 
-        gained_tiles.append([x, y])     # Original move
-        return gained_tiles
+        gainedTiles.append([x, y])     # Original move
+        return gainedTiles
 
-    def possible_moves(self, board, player):
+    def possibleMoves(self, board, player):
         moves = []
 
         for i in range(self.size):
             for j in range(self.size):
-                if self.is_move_possible(board, [i, j], player):
+                if self.isMovePossible(board, [i, j], player):
                     moves.append([i, j])
 
         return moves
 
-    def check_win(self, board):
+    def checkWin(self, board):
         # Check if current player has no possible moves
-        return not self.possible_moves(board, 1) and not self.possible_moves(board, 2)
+        return not self.possibleMoves(board, 1) and not self.possibleMoves(board, 2)
 
     

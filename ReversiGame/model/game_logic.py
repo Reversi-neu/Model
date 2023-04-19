@@ -5,23 +5,23 @@ class GameLogic(ABC):
         self.size = 8
 
     @abstractmethod
-    def get_size(self, s):
+    def getSize(self, s):
         pass
 
     @abstractmethod
-    def is_move_possible(self, board, move, player):
+    def isMovePossible(self, board, move, player):
         pass
 
     @abstractmethod
-    def make_move(self, board, move, player):
+    def makeMove(self, board, move, player):
         pass
 
     @abstractmethod
-    def possible_moves(self, board, player):
+    def possibleMoves(self, board, player):
         pass
 
     @abstractmethod
-    def check_win(self, board):
+    def checkWin(self, board):
         pass
 
     

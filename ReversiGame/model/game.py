@@ -6,60 +6,60 @@ from model.game_prototype import GamePrototype
 
 class Reversi(ReversiInterface, GamePrototype):
     # ai_depth 0 means no AI in game
-    def __init__(self, size=8, game_logic=ClassicMode()): 
+    def __init__(self, size=8, gameLogic=ClassicMode()): 
         self.board = Board(size, board=[])
-        self.board_size = size
-        self.cur_player = Player.black
-        self.game_logic = game_logic
-        self.player1_score = 2
-        self.player2_score = 2
+        self.boardSize = size
+        self.curPlayer = Player.black
+        self.gameLogic = gameLogic
+        self.player1Score = 2
+        self.player2Score = 2
 
-        self.game_logic.get_size(size)
+        self.gameLogic.getSize(size)
 
         self.board.__setitem__([int(size / 2) - 1, int((size / 2) - 1)], Player.black.value)
         self.board.__setitem__([int((size / 2) - 1), int(size / 2)], Player.white.value)
         self.board.__setitem__([int(size / 2), int((size / 2) - 1)], Player.white.value)
         self.board.__setitem__([int(size / 2), int(size / 2)], Player.black.value)
 
-    def is_valid_move(self, move):
+    def isValidMove(self, move):
         # returns False if not valid
-        return self.game_logic.is_move_possible(self.board.get_grid(), move, self.cur_player.value)
+        return self.gameLogic.isMovePossible(self.board.getGrid(), move, self.curPlayer.value)
     
-    def make_move(self, move):
-        gained_tiles = self.game_logic.make_move(self.board.get_grid(), move, self.cur_player.value)
+    def makeMove(self, move):
+        gainedTiles = self.gameLogic.makeMove(self.board.getGrid(), move, self.curPlayer.value)
 
-        for tile in gained_tiles:
-            self.board.__setitem__(tile, self.cur_player.value)
+        for tile in gainedTiles:
+            self.board.__setitem__(tile, self.curPlayer.value)
     
-    def change_cur_player(self):
-        if self.cur_player == Player.black:
-            self.cur_player = Player.white
+    def changeCurPlayer(self):
+        if self.curPlayer == Player.black:
+            self.curPlayer = Player.white
         else:
-            self.cur_player = Player.black
+            self.curPlayer = Player.black
     
-    def check_win(self):
-        self.player1_score = 0
-        self.player2_score = 0
-        for i in range(self.board_size):
-            for j in range(self.board_size):
+    def checkWin(self):
+        self.player1Score = 0
+        self.player2Score = 0
+        for i in range(self.boardSize):
+            for j in range(self.boardSize):
                 if self.board.__getitem__([i, j]) == 1:
-                    self.player1_score += 1
+                    self.player1Score += 1
                 elif self.board.__getitem__([i, j]) == 2:
-                    self.player2_score += 1
+                    self.player2Score += 1
 
         # string of game state
-        return  self.game_logic.check_win(self.board.get_grid())
+        return  self.gameLogic.checkWin(self.board.getGrid())
 
 
-    def possible_moves(self):
+    def possibleMoves(self):
         # array of moves [0, 0]
-        return self.game_logic.possible_moves(self.board.get_grid(), self.cur_player.value)
+        return self.gameLogic.possibleMoves(self.board.getGrid(), self.curPlayer.value)
 
     # DESIGN PATTERN: Prototype
     def copy(self):
-        copied_game = Reversi(self.board_size, self.game_logic)
-        copied_game.board = Board(self.board_size, board=[row.copy() for row in self.board.get_grid()])
-        copied_game.cur_player = self.cur_player
-        copied_game.player1_score = self.player1_score
-        copied_game.player2_score = self.player2_score
-        return copied_game
+        copiedGame = Reversi(self.boardSize, self.gameLogic)
+        copiedGame.board = Board(self.boardSize, board=[row.copy() for row in self.board.getGrid()])
+        copiedGame.curPlayer = self.curPlayer
+        copiedGame.player1Score = self.player1Score
+        copiedGame.player2Score = self.player2Score
+        return copiedGame

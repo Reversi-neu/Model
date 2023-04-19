@@ -3,67 +3,67 @@ class ReversiAI:
         self.depth = depth
 
     def get_best_move(self, game):
-        possible_moves = game.possible_moves()
-        if not possible_moves:
+        possibleMoves = game.possibleMoves()
+        if not possibleMoves:
             return None
 
-        best_move = None
-        best_score = float('-inf')
+        bestMove = None
+        bestScore = float('-inf')
 
-        for move in possible_moves:
-            new_game = game.copy()
-            new_game.make_move(move)
-            new_game.change_cur_player()
-            new_game.check_win()
+        for move in possibleMoves:
+            newGame = game.copy()
+            newGame.makeMove(move)
+            newGame.changeCurPlayer()
+            newGame.checkWin()
 
-            score = self.minimax(new_game, self.depth, False)
+            score = self.minimax(newGame, self.depth, False)
 
             print(f"Move: {move}, Score: {score}")
 
-            if score > best_score:
-                best_score = score
-                best_move = move
+            if score > bestScore:
+                bestScore = score
+                bestMove = move
 
-        return best_move
+        return bestMove
 
-        #print(possible_moves)
+        #print(possibleMoves)
         #print(game.board.get_grid())
         #print(game.player1_score)
         #print(game.player2_score)
 
-        #return possible_moves[0]
+        #return possibleMoves[0]
 
     def minimax(self, game, depth, maximizing):
-        if depth == 0 or game.check_win():
-            if game.cur_player == 1:
-                return game.player1_score - game.player2_score
+        if depth == 0 or game.checkWin():
+            if game.curPlayer == 1:
+                return game.player1Score - game.player2Score
             else:
-                return game.player2_score - game.player1_score
+                return game.player2Score - game.player1Score
 
         if maximizing:
-            max_eval = float('-inf')
+            maxEval = float('-inf')
             
-            for move in game.possible_moves():
-                new_game = game.copy()
-                new_game.make_move(move)
-                new_game.change_cur_player()
-                new_game.check_win()
+            for move in game.possibleMoves():
+                newGame = game.copy()
+                newGame.makeMove(move)
+                newGame.changeCurPlayer()
+                newGame.checkWin()
                 
-                eval = self.minimax(new_game, depth-1, False)
-                max_eval = max(max_eval, eval)
+                eval = self.minimax(newGame, depth-1, False)
+                maxEval = max(maxEval, eval)
 
-            return max_eval
+            return maxEval
 
         else:
-            min_eval = float('inf')
+            minEval = float('inf')
 
-            for move in game.possible_moves():
-                new_game = game.copy()
-                new_game.make_move(move)
-                new_game.change_cur_player()
-                new_game.check_win()
+            for move in game.possibleMoves():
+                newGame = game.copy()
+                newGame.makeMove(move)
+                newGame.changeCurPlayer()
+                newGame.checkWin()
                 
-                eval = self.minimax(new_game, depth-1, True)
-                min_eval = min(min_eval, eval)
+                eval = self.minimax(newGame, depth-1, True)
+                minEval = min(minEval, eval)
 
-            return min_eval
+            return minEval

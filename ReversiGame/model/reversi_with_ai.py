@@ -9,23 +9,23 @@ class ReversiAIProxy(ReversiInterface):
             self.ai = ReversiAI(ai_depth)
 
     def get_ai_move(self):
-        self.reversi.check_win()
+        self.reversi.checkWin()
         return self.ai.get_best_move(self.reversi.copy())
 
-    def is_valid_move(self, move):
-        return self.reversi.is_valid_move(move)
+    def isValidMove(self, move):
+        return self.reversi.isValidMove(move)
 
-    def make_move(self, move):
-        return self.reversi.make_move(move)
+    def makeMove(self, move):
+        return self.reversi.makeMove(move)
 
-    def change_cur_player(self):
-        return self.reversi.change_cur_player()
+    def changeCurPlayer(self):
+        return self.reversi.changeCurPlayer()
 
-    def check_win(self):
-        return self.reversi.check_win()
+    def checkWin(self):
+        return self.reversi.checkWin()
 
-    def possible_moves(self):
-        return self.reversi.possible_moves()
+    def possibleMoves(self):
+        return self.reversi.possibleMoves()
 
     def copy(self):
         return self.reversi.copy()
@@ -34,3 +34,4 @@ class ReversiAIProxy(ReversiInterface):
         if attr == '__deepcopy__':
             return lambda memo: copy.deepcopy(self.reversi, memo)
         return getattr(self.reversi, attr)
+

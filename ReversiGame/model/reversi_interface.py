@@ -3,25 +3,26 @@ from abc import ABC, abstractmethod
 class ReversiInterface(ABC):
 
     @abstractmethod
-    def is_valid_move(self, move):
+    def isValidMove(self, move):
         pass
 
     @abstractmethod
-    def make_move(self, move):
+    def makeMove(self, move):
         pass
 
     @abstractmethod
-    def change_cur_player(self):
+    def changeCurPlayer(self):
         pass
 
     @abstractmethod
-    def check_win(self):
+    def checkWin(self):
         pass
 
     @abstractmethod
-    def possible_moves(self):
+    def possibleMoves(self):
         pass
 
     @abstractmethod
     def copy(self):
         pass
+

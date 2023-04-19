@@ -18,7 +18,7 @@ class GamesManager:
         game = {
             "id": self.gameIdCounter, 
             "game": reversiBoard, 
-            "board": reversiBoard.board.get_grid(),
+            "board": reversiBoard.board.getGrid(),
             "type": gameType, 
             "size": size, 
             "difficulty": difficulty,
@@ -28,7 +28,7 @@ class GamesManager:
             "player1Score": 2, 
             "player2Score": 2, 
             "currentPlayer": 1, 
-            "possibleMoves": reversiBoard.possible_moves(),
+            "possibleMoves": reversiBoard.possibleMoves(),
             "active": True
         }
         self.games.append(game)
@@ -40,30 +40,30 @@ class GamesManager:
     
     def makeMove(self, gameType, gameID, move):
         game = list(filter(lambda game: game['id'] == int(gameID), self.games))[0]
-        game['game'].make_move([move["x"], move["y"]])
+        game['game'].makeMove([move["x"], move["y"]])
 
         # this logic is not good, maybe... either the bot is goated and i suck, or its cheating and i cant tell
-        game['game'].change_cur_player()
-        possibleMoves = game['game'].possible_moves()
+        game['game'].changeCurPlayer()
+        possibleMoves = game['game'].possibleMoves()
         if (len(possibleMoves) == 0):
-            game['game'].change_cur_player()
+            game['game'].changeCurPlayer()
         elif (gameType == 'ai'):
             while True:
-                game['game'].make_move(game['game'].get_ai_move())
-                game['game'].change_cur_player()
-                possibleMoves = game['game'].possible_moves()
-                if game['game'].check_win(): break
+                game['game'].makeMove(game['game'].get_ai_move())
+                game['game'].changeCurPlayer()
+                possibleMoves = game['game'].possibleMoves()
+                if game['game'].checkWin(): break
                 if (len(possibleMoves) == 0):
-                    game['game'].change_cur_player()
+                    game['game'].changeCurPlayer()
                 else:
                     break
         
-        game['winner'] = game['game'].check_win()
-        game['player1Score'] = game['game'].player1_score
-        game['player2Score'] = game['game'].player2_score
-        game['board'] = game['game'].board.get_grid()
+        game['winner'] = game['game'].checkWin()
+        game['player1Score'] = game['game'].player1Score
+        game['player2Score'] = game['game'].player2Score
+        game['board'] = game['game'].board.getGrid()
         game['currentPlayer'] = game['game'].cur_player
-        game['possibleMoves'] = game['game'].possible_moves()
+        game['possibleMoves'] = game['game'].possibleMoves()
 
         game_copy = copy.deepcopy(game)
         game_copy.pop('game')

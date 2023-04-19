@@ -15,5 +15,5 @@ class Board:
     def __setitem__(self, coordinate, player: Player):
         self.board[coordinate[1]][coordinate[0]] = player
 
-    def get_grid(self):
+    def getGrid(self):
         return self.board
